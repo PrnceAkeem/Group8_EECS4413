@@ -35,3 +35,31 @@ async function findByEmail(email) {
 
 //Export both functions so the controller can call them
 module.exports = { insertCustomer, findByEmail };
+
+
+
+
+
+// local logic test
+// async function insertCustomer(firstName, lastName, dob, email, password) {
+//   return {
+//     customerID: 1,
+//     firstName,
+//     email
+//   };
+// }
+
+// async function findByEmail(email) {
+//   if (email === 'test@example.com') {
+//     return {
+//       customerID: 1,
+//       firstName: 'Shilong',
+//       email: 'test@example.com',
+//       password: '123456'
+//     };
+//   }
+
+//   return undefined;
+// }
+
+// module.exports = { insertCustomer, findByEmail };

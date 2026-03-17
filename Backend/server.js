@@ -14,7 +14,7 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 
 //The port this server listens on
-const PORT = 5000;
+const PORT = 5050;
 
 //Lets Express read JSON data sent from the browser
 app.use(express.json());
@@ -37,6 +37,10 @@ app.use(session({
     maxAge: 1000 * 60 * 5        //How long the cookie lasts — 5 minutes (JS does time in milliseconds)
   }
 }));
+
+app.get('/', (req, res) => {
+  res.send('Server is working');
+});
 
 // ROUTES
 // Hand off any request starting with /api/auth to our authRoutes file
