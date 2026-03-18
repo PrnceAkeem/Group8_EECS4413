@@ -1,20 +1,18 @@
 const CustomerDAO = require('../dao/CustomerDAO');
 
-// REGISTER
 async function register(req, res) {
   try {
     const { firstName, lastName, dob, email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    // basic validation
-    if (!firstName || !lastName || !dob || !email || !password) {
+    if (!firstName || !lastName || !dob || !normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required.'
       });
     }
 
-    // check if user already exists
-    const existingCustomer = await CustomerDAO.findByEmail(email);
+    const existingCustomer = await CustomerDAO.findByEmail(normalizedEmail);
 
     if (existingCustomer) {
       return res.status(409).json({
@@ -23,12 +21,11 @@ async function register(req, res) {
       });
     }
 
-    // insert new customer
     const newCustomer = await CustomerDAO.insertCustomer(
-      firstName,
-      lastName,
+      firstName.trim(),
+      lastName.trim(),
       dob,
-      email,
+      normalizedEmail,
       password
     );
 
@@ -37,8 +34,14 @@ async function register(req, res) {
       message: 'Registration successful.',
       customer: newCustomer
     });
-
   } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({
+        success: false,
+        message: 'Email already registered.'
+      });
+    }
+
     console.error('Register error:', error);
     return res.status(500).json({
       success: false,
@@ -47,43 +50,32 @@ async function register(req, res) {
   }
 }
 
-// LOGIN
 async function login(req, res) {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    // basic validation
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
         message: 'Email and password are required.'
       });
     }
 
-    // find user by email
-    const customer = await CustomerDAO.findByEmail(email);
+    const customer = await CustomerDAO.findByEmail(normalizedEmail);
 
-    if (!customer) {
+    if (!customer || customer.password !== password) {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password.'
       });
     }
 
-    // plain text password check for now
-    // later you can replace with bcrypt
-    if (customer.password !== password) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password.'
-      });
-    }
-
-    // create session
     req.session.user = {
-      customerID: customer.customerid || customer.customerID,
-      firstName: customer.firstname || customer.firstName,
-      email: customer.email
+      customerId: customer.customerId,
+      firstName: customer.firstName,
+      email: customer.email,
+      isAdmin: customer.isAdmin
     };
 
     return res.status(200).json({
@@ -91,7 +83,6 @@ async function login(req, res) {
       message: 'Login successful.',
       user: req.session.user
     });
-
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({

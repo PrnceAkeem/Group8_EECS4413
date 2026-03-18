@@ -1,65 +1,44 @@
-//Pull in the database connection pool from db.js
 const db = require('../db');
 
-/*
-INSERT a new customer into the database
-Called when a user submits the Sign Up form
-*/
+function mapCustomer(row) {
+  if (!row) {
+    return undefined;
+  }
+
+  return {
+    customerId: row.customer_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    dob: row.dob,
+    email: row.email,
+    password: row.password,
+    isAdmin: row.is_admin
+  };
+}
 
 async function insertCustomer(firstName, lastName, dob, email, password) {
-
-  //$1, $2, $3... are placeholders — pg fills them in safely
-  //This prevents SQL injection (someone typing SQL into your form fields)
   const result = await db.query(
-    `INSERT INTO Customer (firstName, lastName, dob, email, password)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING customerID, firstName, email`,
+    `INSERT INTO customers (first_name, last_name, dob, email, password)
+     VALUES ($1, $2, $3::date, $4, $5)
+     RETURNING customer_id, first_name, last_name, dob, email, is_admin`,
     [firstName, lastName, dob, email, password]
   );
 
-  return result.rows[0]; //PostgreSQL gives back the newly created row
-} //rows[0] grabs the first (and only) row from the result
+  return mapCustomer(result.rows[0]);
+}
 
-
-//FIND a customer by their email address
 async function findByEmail(email) {
-
   const result = await db.query(
-    `SELECT * FROM Customer WHERE email = $1`, //Called when a user submits the Sign In form
+    `SELECT customer_id, first_name, last_name, dob, email, password, is_admin
+     FROM customers
+     WHERE LOWER(email) = LOWER($1)`,
     [email]
   );
 
-  //Returns the customer row if found, or undefined if no match
-  return result.rows[0];
+  return mapCustomer(result.rows[0]);
 }
 
-//Export both functions so the controller can call them
-module.exports = { insertCustomer, findByEmail };
-
-
-
-
-
-// local logic test
-// async function insertCustomer(firstName, lastName, dob, email, password) {
-//   return {
-//     customerID: 1,
-//     firstName,
-//     email
-//   };
-// }
-
-// async function findByEmail(email) {
-//   if (email === 'test@example.com') {
-//     return {
-//       customerID: 1,
-//       firstName: 'Shilong',
-//       email: 'test@example.com',
-//       password: '123456'
-//     };
-//   }
-
-//   return undefined;
-// }
-
-// module.exports = { insertCustomer, findByEmail };
+module.exports = {
+  insertCustomer,
+  findByEmail
+};
