@@ -1,3 +1,16 @@
+/*
+ * db.js — Database Connection Pool
+ *
+ * Creates and exports a single shared PostgreSQL connection pool.
+ * A pool keeps connections open and reuses them across requests —
+ * more efficient than opening a brand new connection every time.
+ *
+ * Supports two connection modes:
+ *   1. DATABASE_URL env variable — used for cloud deployment (e.g. AWS, Heroku)
+ *   2. Individual credentials (DB_USER, DB_HOST, etc.) — used for local Docker
+ *
+ * Every file that needs to query the database just does: require('./db')
+ */
 const { Pool } = require('pg');
 
 function parseInteger(value, fallback) {
