@@ -2,88 +2,91 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
-//LoginPage — allows an existing customer to sign in.
-//On success, the backend creates a session and sends back a cookie.
-//The user is then redirected to the landing page.
-
 function LoginPage() {
-  //useState holds the value of each input field as the user types
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
 
-  //message shows feedback to the user (success or error)
-  const [message, setMessage]   = useState('');
-
-  //useNavigate lets us redirect the user to another page after login
   const navigate = useNavigate();
 
-  //handleSubmit runs when the Sign In button is clicked
   async function handleSubmit(e) {
-    //Prevent the default browser form submission (which would reload the page)
     e.preventDefault();
 
     try {
-      //Send a POST request to the backend login endpoint
-      //withCredentials: true is required so the browser saves the session cookie
-      const response = await axios.post('/api/auth/login',
+      const response = await axios.post(
+        '/api/auth/login',
         { email, password },
         { withCredentials: true }
       );
 
-      //Show a welcome message then redirect to the landing page
       setMessage(`Welcome, ${response.data.user.firstName}!`);
       setTimeout(() => navigate('/'), 1000);
-
     } catch (error) {
-      //If login failed, show the error message returned by the backend
       setMessage(error.response?.data?.message || 'Login failed.');
     }
   }
 
   return (
-    <div>
-      <h2>Sign In</h2>
+    <div className="auth-page">
+      <div className="auth-left">
+        <div className="auth-brand">6ixOutside</div>
+        <h1>Welcome back.</h1>
+        <p>
+          Sign in to access your cart, manage your account, and shop the latest
+          sneaker drops.
+        </p>
 
-      <form onSubmit={handleSubmit}>
+        <div className="demo-box">
+          <h3>Demo Accounts</h3>
+          <p>
+            <strong>Customer:</strong> maya@sixoutside.com / demo123
+          </p>
+          <p>
+            <strong>Admin:</strong> admin@sixoutside.com / admin123
+          </p>
+        </div>
+      </div>
 
-        {/* Email field */}
-        <div>
-          <label>Email:</label><br />
+      <div className="auth-right">
+        <form className="auth-card" onSubmit={handleSubmit}>
+          <h2>Sign In</h2>
+          <p className="auth-subtext">Enter your account details below.</p>
+
+          <label htmlFor="email">Email</label>
           <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
+            required
           />
-        </div>
 
-        <br />
-
-        {/* Password field */}
-        <div>
-          <label>Password:</label><br />
+          <label htmlFor="password">Password</label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
+            required
           />
-        </div>
 
-        <br />
+          <button type="submit" className="auth-btn">
+            Sign In
+          </button>
 
-        {/* Submit button — triggers handleSubmit */}
-        <button type="submit">Sign In</button>
+          {message && <p className="auth-message">{message}</p>}
 
-      </form>
+          <p className="auth-switch">
+            Don&apos;t have an account? <Link to="/register">Sign Up</Link>
+          </p>
 
-      {/* Shows success or error message after submission */}
-      {message && <p>{message}</p>}
-
-      <br />
-      {/* Link to register page if the user doesn't have an account */}
-      <p>Don't have an account? <Link to="/register">Sign Up</Link></p>
-
+          <p className="auth-switch">
+            <Link to="/">Back to Store</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
