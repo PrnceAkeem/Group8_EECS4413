@@ -38,12 +38,14 @@ function LoginPage() {
 
         <div className="demo-box">
           <h3>Demo Accounts</h3>
-          <p>
-            <strong>Customer:</strong> maya@sixoutside.com / demo123
-          </p>
-          <p>
-            <strong>Admin:</strong> admin@sixoutside.com / admin123
-          </p>
+          <ul className="auth-list">
+            <li>
+              <strong>Customer:</strong> maya@sixoutside.com / demo123
+            </li>
+            <li>
+              <strong>Admin:</strong> admin@sixoutside.com / admin123
+            </li>
+          </ul>
         </div>
       </div>
 

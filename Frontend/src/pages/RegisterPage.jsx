@@ -2,128 +2,127 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
-//RegisterPage — allows a new customer to create an account.
-//On success, the backend inserts a new row into the customers table
-//and the user is redirected to the login page to sign in.
-
 function RegisterPage() {
-  //One useState for each form field
   const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName]   = useState('');
-  const [dob, setDob]             = useState('');
-  const [email, setEmail]         = useState('');
-  const [password, setPassword]   = useState('');
+  const [lastName, setLastName] = useState('');
+  const [dob, setDob] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
 
-  //message shows feedback to the user (success or error)
-  const [message, setMessage]     = useState('');
-
-  //useNavigate lets us redirect to login after successful registration
   const navigate = useNavigate();
 
-  //handleSubmit runs when the Sign Up button is clicked
   async function handleSubmit(e) {
-    //Prevent the default browser form submission
     e.preventDefault();
 
     try {
-      //Send all form fields to the backend register endpoint
-      await axios.post('/api/auth/register',
+      await axios.post(
+        '/api/auth/register',
         { firstName, lastName, dob, email, password },
         { withCredentials: true }
       );
 
-      //Registration worked — tell the user and send them to login
       setMessage('Account created! Redirecting to Sign In...');
-      setTimeout(() => navigate('/login'), 1500);
-
+      setTimeout(() => navigate('/login'), 1300);
     } catch (error) {
-      //Show the error message from the backend (e.g. email already in use)
       setMessage(error.response?.data?.message || 'Registration failed.');
     }
   }
 
   return (
-    <div>
-      <h2>Sign Up</h2>
+    <div className="auth-page">
+      <div className="auth-left">
+        <div className="auth-brand">6ixOutside</div>
+        <h1>Create your account.</h1>
+        <p>
+          Join the store to save favorites, track orders, and move through
+          checkout faster.
+        </p>
 
-      <form onSubmit={handleSubmit}>
-
-        {/* First Name */}
-        <div>
-          <label>First Name:</label><br />
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            placeholder="First name"
-          />
+        <div className="demo-box">
+          <h3>What you get</h3>
+          <ul className="auth-list">
+            <li>Faster checkout and saved account info</li>
+            <li>Order updates and purchase history</li>
+            <li>Early access to selected sneaker drops</li>
+          </ul>
         </div>
+      </div>
 
-        <br />
+      <div className="auth-right">
+        <form className="auth-card" onSubmit={handleSubmit}>
+          <h2>Sign Up</h2>
+          <p className="auth-subtext">Fill in your details to get started.</p>
 
-        {/* Last Name */}
-        <div>
-          <label>Last Name:</label><br />
+          <div className="auth-row">
+            <div>
+              <label htmlFor="firstName">First Name</label>
+              <input
+                id="firstName"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Akeem"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                id="lastName"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Mitchell"
+                required
+              />
+            </div>
+          </div>
+
+          <label htmlFor="dob">Date of Birth</label>
           <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder="Last name"
-          />
-        </div>
-
-        <br />
-
-        {/* Date of Birth */}
-        <div>
-          <label>Date of Birth:</label><br />
-          <input
+            id="dob"
             type="date"
             value={dob}
             onChange={(e) => setDob(e.target.value)}
+            required
           />
-        </div>
 
-        <br />
-
-        {/* Email */}
-        <div>
-          <label>Email:</label><br />
+          <label htmlFor="email">Email</label>
           <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email address"
+            placeholder="name@email.com"
+            required
           />
-        </div>
 
-        <br />
-
-        {/* Password */}
-        <div>
-          <label>Password:</label><br />
+          <label htmlFor="password">Password</label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
+            required
           />
-        </div>
 
-        <br />
+          <button type="submit" className="auth-btn">
+            Create Account
+          </button>
 
-        {/* Submit button */}
-        <button type="submit">Sign Up</button>
+          {message && <p className="auth-message">{message}</p>}
 
-      </form>
-
-      {/* Shows success or error message after submission */}
-      {message && <p>{message}</p>}
-
-      <br />
-      {/* Link back to login if they already have an account */}
-      <p>Already have an account? <Link to="/login">Sign In</Link></p>
-
+          <p className="auth-switch">
+            Already have an account? <Link to="/login">Sign In</Link>
+          </p>
+          <p className="auth-switch">
+            <Link to="/">Back to Store</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

@@ -26,7 +26,7 @@ const products = [
     price: '$169.99',
     category: 'Women',
     image:
-      'https://images.unsplash.com/photo-1608256246200-53e8b47b2f80?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1600181516264-3ea807ff44b9?auto=format&fit=crop&w=900&q=80',
   },
   {
     id: 4,
@@ -75,6 +75,25 @@ const products = [
   },
 ];
 
+const filterGroups = [
+  {
+    title: 'Colors',
+    options: ['Black', 'White', 'Red', 'Blue'],
+  },
+  {
+    title: 'Size',
+    options: ['7', '8', '9', '10', '11'],
+  },
+  {
+    title: 'Price',
+    options: ['Under $150', '$150 - $200', 'Over $200'],
+  },
+  {
+    title: 'Brand',
+    options: ['Nike', 'Adidas', 'Puma', 'New Balance'],
+  },
+];
+
 function LandingPage() {
   return (
     <div className="store-page">
@@ -86,9 +105,6 @@ function LandingPage() {
         </div>
 
         <div className="store-actions">
-          <button className="icon-btn" type="button">
-            🛒
-          </button>
           <Link to="/login" className="header-link">
             Sign In
           </Link>
@@ -99,10 +115,9 @@ function LandingPage() {
       </header>
 
       <section className="top-banner">
-        <div>
+        <div className="top-banner-content">
           <p className="banner-label">Streetwear Footwear</p>
-          <h1>6ixOutside Store</h1>
-          <p>
+          <p className="banner-copy">
             Shop trending sneakers, everyday essentials, and the newest drops in
             one place.
           </p>
@@ -134,7 +149,6 @@ function LandingPage() {
               <option>Price: Low to High</option>
               <option>Price: High to Low</option>
               <option>Newest</option>
-              <option>Brand</option>
             </select>
           </div>
 
@@ -162,85 +176,24 @@ function LandingPage() {
         <aside className="filters-panel">
           <h3>Filters</h3>
 
-          <div className="filter-group">
-            <h4>Category</h4>
-            <label>
-              <input type="checkbox" /> New Arrivals
-            </label>
-            <label>
-              <input type="checkbox" /> Men
-            </label>
-            <label>
-              <input type="checkbox" /> Women
-            </label>
-            <label>
-              <input type="checkbox" /> Kids
-            </label>
-          </div>
+          {filterGroups.map((group, index) => (
+            <details
+              key={group.title}
+              className="filter-dropdown"
+              open={index === 0}
+            >
+              <summary>{group.title}</summary>
 
-          <div className="filter-group">
-            <h4>Colors</h4>
-            <label>
-              <input type="checkbox" /> Black
-            </label>
-            <label>
-              <input type="checkbox" /> White
-            </label>
-            <label>
-              <input type="checkbox" /> Red
-            </label>
-            <label>
-              <input type="checkbox" /> Blue
-            </label>
-          </div>
-
-          <div className="filter-group">
-            <h4>Size</h4>
-            <label>
-              <input type="checkbox" /> 7
-            </label>
-            <label>
-              <input type="checkbox" /> 8
-            </label>
-            <label>
-              <input type="checkbox" /> 9
-            </label>
-            <label>
-              <input type="checkbox" /> 10
-            </label>
-            <label>
-              <input type="checkbox" /> 11
-            </label>
-          </div>
-
-          <div className="filter-group">
-            <h4>Price</h4>
-            <label>
-              <input type="checkbox" /> Under $150
-            </label>
-            <label>
-              <input type="checkbox" /> $150 - $200
-            </label>
-            <label>
-              <input type="checkbox" /> Over $200
-            </label>
-          </div>
-
-          <div className="filter-group">
-            <h4>Brand</h4>
-            <label>
-              <input type="checkbox" /> Nike
-            </label>
-            <label>
-              <input type="checkbox" /> Adidas
-            </label>
-            <label>
-              <input type="checkbox" /> Puma
-            </label>
-            <label>
-              <input type="checkbox" /> New Balance
-            </label>
-          </div>
+              <div className="filter-options">
+                {group.options.map((option) => (
+                  <label key={option}>
+                    <input type="checkbox" />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+            </details>
+          ))}
         </aside>
       </main>
     </div>
