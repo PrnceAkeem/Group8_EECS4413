@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
+import CatalogPage from './pages/CatalogPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import './index.css';
@@ -14,6 +15,9 @@ function App() {
       <Routes>
         {/* Public landing page — no login required */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Catalog — pulls live products from API */}
+        <Route path="/catalog" element={<CatalogPage />} />
 
         {/* Sign in page */}
         <Route path="/login" element={<LoginPage />} />

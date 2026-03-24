@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 
 const pool = require('./db');
 const authRoutes = require('./routes/authRoutes');
+const catalogRoutes = require('./routes/catalogRoutes');
 
 const app = express();
 const PORT = Number.parseInt(process.env.PORT || '5050', 10);
@@ -51,6 +52,7 @@ app.get('/health', async (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/catalog', catalogRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://0.0.0.0:${PORT}`);
