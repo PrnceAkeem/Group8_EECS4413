@@ -67,7 +67,66 @@ async function getProductById(productId) {
   return mapProduct(result.rows[0]);
 }
 
+const SORT_MAP = {
+  price_asc:  'p.price_cents ASC',
+  price_desc: 'p.price_cents DESC',
+  name_asc:   'p.name ASC',
+  name_desc:  'p.name DESC'
+};
+
+async function getProducts({ brand, category, q, sort } = {}) {
+  const orderBy = SORT_MAP[sort] || 'p.name ASC';
+
+  const conditions = ['p.is_active = TRUE'];
+  const values = [];
+
+  if (brand) {
+    values.push(brand);
+    conditions.push(`LOWER(b.name) = LOWER($${values.length})`);
+  }
+
+  if (category) {
+    values.push(category);
+    conditions.push(`LOWER(c.name) = LOWER($${values.length})`);
+  }
+
+  if (q) {
+    values.push(`%${q}%`);
+    conditions.push(
+      `(p.name ILIKE $${values.length} OR p.description ILIKE $${values.length})`
+    );
+  }
+
+  const where = conditions.join(' AND ');
+
+  const result = await db.query(
+    `SELECT
+       p.product_id,
+       p.name,
+       p.model,
+       b.name  AS brand,
+       c.name  AS category,
+       p.description,
+       p.colorway,
+       p.price_cents,
+       p.inventory_quantity,
+       p.release_year,
+       p.size_range,
+       p.image_url
+     FROM products p
+     JOIN brands     b ON b.brand_id    = p.brand_id
+     JOIN categories c ON c.category_id = p.category_id
+     WHERE ${where}
+     ORDER BY ${orderBy}`,
+    values
+  );
+
+  return result.rows.map(mapProduct);
+}
+
 module.exports = {
   getAllProducts,
-  getProductById
+  getProductById,
+  getProducts,
+  VALID_SORT_KEYS: Object.keys(SORT_MAP)
 };
