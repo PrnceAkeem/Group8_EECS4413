@@ -74,6 +74,15 @@ Default endpoints:
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 
+## Catalog API Examples
+
+Contract details are documented in `docs/catalog-api.md`.
+
+- `GET /api/catalog`
+- `GET /api/catalog?brand=Nike&sort=price_asc`
+- `GET /api/catalog?category=Lifestyle&q=air`
+- `GET /api/catalog/SNK-NIKE-AF1`
+
 ## Environment Variables
 
 Compose defaults are provided, but you can override them through a local `.env` file using
