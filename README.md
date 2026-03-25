@@ -6,27 +6,27 @@
 
 ## What Is This?
 
-This is our group project for EECS 4413: Building E-Commerce Systems. We built a sneaker and streetwear store called **6ixOutside** that sells shoes from Nike, Jordan, Adidas, Converse, and New Balance.
+This is our group project for EECS 4413: Building E-Commerce Systems at York University. We built a sneaker and streetwear store called **6ixOutside** that lets users browse, filter, and view shoes from Nike, Jordan, Adidas, Converse, and New Balance.
 
-The project follows the three-tier architecture covered in class:
+The course taught us how to build e-commerce systems using a **three-tier architecture** (covered from Lab 3 onward):
 
-- **Presentation tier** — React frontend (what the user sees and interacts with)
-- **Logic tier** — Node.js + Express backend (business rules, API endpoints)
-- **Data tier** — PostgreSQL database (stores all products, users, orders)
+- **Presentation tier** — what the user sees (React frontend, same role as JSP views in the labs)
+- **Logic tier** — business rules and request handling (Node.js + Express, same role as Servlets in the labs)
+- **Data tier** — persistent storage (PostgreSQL, same role as MySQL/SQLite in Lab 6)
 
-This structure is the same idea as the warehouse lab from class — a clean boundary between each layer so they don't bleed into each other.
+We chose a JavaScript/React stack instead of Java Servlets/JSP because the course spec allows any implementation language, but all the architectural patterns we apply come directly from the labs.
 
 ---
 
 ## Tech Stack
 
-| Layer       | What We Used                               | Why                                                      |
-|-------------|--------------------------------------------|----------------------------------------------------------|
-| Frontend    | React 18, React Router v7, Axios           | Component-based UI, client-side routing, HTTP calls      |
-| Backend     | Node.js, Express 4                         | Same setup as the warehouse lab                          |
-| Database    | PostgreSQL 16 (`pg` library)               | Relational DB with JOINs across products/brands/orders   |
-| Auth        | `express-session` + cookies                | Session-based auth as covered in the auth lab            |
-| Deployment  | Docker Compose                             | Course spec requires a runnable deployment target        |
+| Layer       | What We Used                       | Course Equivalent (from labs)                       |
+|-------------|------------------------------------|-----------------------------------------------------|
+| Frontend    | React 18, React Router v7, Axios   | HTML/CSS/JS (Lab 1), JSP views (Lab 5)              |
+| Backend     | Node.js, Express 4                 | Java Servlets (Lab 3, 4, 5)                         |
+| Database    | PostgreSQL 16 (`pg` library)       | MySQL / SQLite + JDBC (Lab 6)                       |
+| Auth        | `express-session` + cookies        | HttpSession / Cookie tracking (Lab 4)               |
+| Deployment  | Docker Compose                     | Course spec requirement — runnable on any machine   |
 
 ---
 
@@ -34,20 +34,20 @@ This structure is the same idea as the warehouse lab from class — a clean boun
 
 ### Step 1 — Start the backend and database (Docker)
 
-Make sure Docker Desktop is running, then from the project root:
+Make sure Docker Desktop is open, then from the project root:
 
 ```bash
 docker compose up --build
 ```
 
-This spins up:
+This starts two containers:
 
-| Container  | What it does                                           | Port |
-|------------|--------------------------------------------------------|------|
-| `db`       | PostgreSQL — automatically runs our schema + seed SQL  | 5432 |
-| `backend`  | Express API                                            | 5050 |
+| Container  | What it does                                                      | Port |
+|------------|-------------------------------------------------------------------|------|
+| `db`       | PostgreSQL — runs `01_schema.sql` then `02_seed.sql` on startup   | 5432 |
+| `backend`  | Node/Express REST API                                             | 5050 |
 
-The first time it runs, Docker will execute `01_schema.sql` (creates all tables) and `02_seed.sql` (inserts demo products and accounts) automatically.
+The first time you run it, Docker automatically creates all tables and inserts the demo products and accounts — no manual SQL needed.
 
 ### Step 2 — Start the React frontend
 
@@ -57,7 +57,7 @@ npm install
 npm start
 ```
 
-Frontend opens at `http://localhost:3000`. It proxies all `/api/*` requests to the backend at port 5050 — this is set in `Frontend/package.json` so we never hardcode the backend URL in our components.
+Frontend opens at `http://localhost:3000`. It proxies all `/api/*` requests to the backend at port 5050 using the `"proxy"` field in `Frontend/package.json` — so we never hardcode the backend URL inside any component.
 
 ---
 
@@ -75,38 +75,38 @@ Frontend opens at `http://localhost:3000`. It proxies all `/api/*` requests to t
 ```
 Group8_EECS4413/
 ├── Backend/
-│   ├── server.js               # Entry point — sets up Express, middleware, mounts routes
-│   ├── controllers/            # MVC Controllers — handle req/res, call DAOs, send JSON
+│   ├── server.js               # Entry point — sets up Express, mounts routes
+│   ├── controllers/            # MVC Controllers (Lab 5 concept — same job as Servlets)
 │   │   ├── authController.js   # register, login
 │   │   └── catalogController.js# listProducts, getProduct, listBrands, listCategories
-│   ├── dao/                    # Data Access Objects — all SQL lives here (warehouse lab pattern)
+│   ├── dao/                    # Data Access Objects (Lab 6 pattern — isolates all SQL)
 │   │   ├── CustomerDAO.js
 │   │   └── ProductDAO.js
-│   ├── routes/                 # Express routers — map URL paths to controller functions
+│   ├── routes/                 # Express routers — map URLs to controller functions
 │   │   ├── authRoutes.js       # /api/auth/*
 │   │   └── catalogRoutes.js    # /api/catalog/*
 │   └── db/
 │       └── init/
-│           ├── 01_schema.sql   # Creates all tables
-│           └── 02_seed.sql     # Inserts products, demo users, sample orders
+│           ├── 01_schema.sql   # Table definitions (brands, products, customers, orders...)
+│           └── 02_seed.sql     # Demo products and accounts
 ├── Frontend/
 │   └── src/
-│       ├── App.js              # Root component — defines all routes
+│       ├── App.js              # Root component — defines all client-side routes
 │       ├── context/
 │       │   └── AuthContext.js  # Observer pattern — shared login state across all pages
 │       ├── pages/
 │       │   ├── LandingPage.jsx
-│       │   ├── CatalogPage.jsx         # Product listing with filters, sort, search
-│       │   ├── ProductDetailPage.jsx   # Single product view
+│       │   ├── CatalogPage.jsx         # Browse products, filter by brand/category, search
+│       │   ├── ProductDetailPage.jsx   # Single product view with inventory status
 │       │   ├── LoginPage.jsx
 │       │   └── RegisterPage.jsx
 │       ├── services/
-│       │   └── catalogApi.js   # All Axios calls to /api/catalog — keeps fetch logic out of pages
+│       │   └── catalogApi.js   # Axios wrapper — keeps fetch logic out of page components
 │       └── utils/
-│           └── sortStrategies.js  # Strategy pattern — sort options as swappable objects
+│           └── sortStrategies.js  # Strategy pattern — each sort option as a swappable object
 ├── docs/
-│   ├── catalog-api.md          # API contract (request/response shapes, error codes)
-│   └── phase2-smoke-test.md    # Manual test checklist for Phase 2
+│   ├── catalog-api.md          # API contract (endpoints, params, response shapes, errors)
+│   └── phase2-smoke-test.md    # Manual test checklist
 └── docker-compose.yml
 ```
 
@@ -116,135 +116,189 @@ Group8_EECS4413/
 
 ### Auth — `/api/auth`
 
-| Method | Path        | Body                                | Returns                  |
-|--------|-------------|-------------------------------------|--------------------------|
-| POST   | `/register` | `firstName, lastName, dob, email, password` | `201` + customer object |
-| POST   | `/login`    | `email, password`                   | `200` + sets session cookie |
+| Method | Path        | Body                                              | Response              |
+|--------|-------------|---------------------------------------------------|-----------------------|
+| POST   | `/register` | `firstName, lastName, dob, email, password`       | `201` + customer info |
+| POST   | `/login`    | `email, password`                                 | `200` + sets session cookie |
 
 ### Catalog — `/api/catalog`
 
 | Method | Path          | Description                                          |
 |--------|---------------|------------------------------------------------------|
-| GET    | `/`           | All active products — supports filter/sort/search    |
-| GET    | `/:id`        | Single product by product ID (e.g. `SNK-NIKE-DUNK`)  |
-| GET    | `/brands`     | List of brands that have active products             |
-| GET    | `/categories` | List of categories that have active products         |
+| GET    | `/`           | All active products — supports filtering and sorting |
+| GET    | `/:id`        | Single product by ID (e.g. `SNK-NIKE-DUNK`)          |
+| GET    | `/brands`     | Distinct brands that have at least one active product |
+| GET    | `/categories` | Distinct categories that have at least one active product |
 
 **Query params for `GET /api/catalog`:**
 
-| Param      | Example      | What it does                        |
-|------------|--------------|-------------------------------------|
-| `brand`    | `Nike`       | Filter to one brand                 |
-| `category` | `Basketball` | Filter to one category              |
-| `q`        | `air`        | Search product name and description |
-| `sort`     | `price_asc`  | Order results (see valid values)    |
+| Param      | Example      | What it does                            |
+|------------|--------------|-----------------------------------------|
+| `brand`    | `Nike`       | Filter to one brand                     |
+| `category` | `Basketball` | Filter to one category                  |
+| `q`        | `air`        | Search product name and description     |
+| `sort`     | `price_asc`  | Sort results (see valid values below)   |
 
 **Valid sort values:** `price_asc`, `price_desc`, `name_asc`, `name_desc`
 
-See [`docs/catalog-api.md`](docs/catalog-api.md) for full request/response shapes and error codes.
+Full request/response contract in [`docs/catalog-api.md`](docs/catalog-api.md).
 
 ---
 
-## Design Patterns
+## Design Patterns & Architecture
 
-These are the GoF and architectural patterns we applied, as covered in the EECS 4413 lectures and labs:
+All patterns below come from EECS 4413 course content. Where the lab used Java, we applied the same concept in JavaScript.
+
+---
+
+### Three-Tier Architecture
+**Referenced throughout the course from Lab 3 onward.**
+
+The course introduced three-tier architecture as the standard structure for e-commerce systems: a client layer, an application server layer, and a data layer, each with a clear boundary.
+
+| Tier         | Lab equivalent         | Our implementation                  |
+|--------------|------------------------|-------------------------------------|
+| Presentation | HTML/CSS/JS, JSP views | React pages (CatalogPage, etc.)     |
+| Logic        | Servlets               | Express controllers                 |
+| Data         | MySQL + JDBC           | PostgreSQL + `pg` library           |
+
+---
 
 ### MVC (Model–View–Controller)
-This is the main architectural pattern from the course. The three layers are:
-- **Model** = DAOs (`ProductDAO.js`, `CustomerDAO.js`) — the only files that touch SQL
-- **View** = React pages (`CatalogPage.jsx`, `ProductDetailPage.jsx`, etc.)
-- **Controller** = Express controllers (`catalogController.js`, `authController.js`) — receives the HTTP request, calls the right DAO, sends back JSON
+**From Lab 5 — JSP and MVC pattern lab.**
 
-The route files (`catalogRoutes.js`, `authRoutes.js`) sit in front of the controllers and just map URLs to the right function — same layout as the warehouse lab.
+Lab 5 introduced MVC using Servlets as controllers, JSP as views, and Java Beans as the model. We apply the same pattern:
+
+- **Model** = DAOs (`ProductDAO.js`, `CustomerDAO.js`) — own all data access
+- **View** = React pages — render the data returned by the API
+- **Controller** = Express controllers (`catalogController.js`, `authController.js`) — receive HTTP requests, call the right DAO, return JSON
+
+The route files sit in front of the controllers and map incoming URLs to the right function — the same role that Servlet URL mappings played in `web.xml`.
+
+---
 
 ### DAO (Data Access Object)
-From the warehouse lab: all SQL is isolated inside the `dao/` folder. Controllers never write SQL — they call a DAO function and get back a plain JavaScript object. This means if we ever change the database, we only touch one file.
+**From Lab 6 — JDBC and DAO pattern lab.**
 
-We also use a `mapProduct(row)` helper inside the DAO to convert PostgreSQL's `snake_case` column names to camelCase before sending them to the frontend — same pattern from the lab.
+Lab 6 taught the DAO pattern: define a DAO interface, implement it with database-specific code (JDBC), and keep all SQL out of the controllers. This means if you swap databases, you only change one file.
+
+We apply the same idea with Node.js:
+- `ProductDAO.js` and `CustomerDAO.js` contain all SQL queries
+- Controllers never write SQL — they call a DAO function and get back a plain object
+- Each DAO has a `mapProduct(row)` / `mapCustomer(row)` helper that converts PostgreSQL's `snake_case` column names to camelCase before returning data — same as mapping a ResultSet to a Java Bean in the lab
+
+In Lab 6, JDBC used `?` placeholders to prevent SQL injection. We use PostgreSQL's `$1, $2` parameterized syntax for the same reason.
+
+---
+
+### Session Tracking / Authentication
+**From Lab 4 — Advanced Servlets, session tracking lab.**
+
+Lab 4 covered three ways to track sessions: hidden fields, cookies, and `HttpSession`. We use the cookie + server session approach (`express-session`), which is the direct equivalent of `HttpSession` from the lab:
+
+- On login, `authController.js` sets `req.session.user = { customerId, firstName, email, isAdmin }`
+- The session is stored server-side; only a session ID is sent to the browser as a cookie
+- This is the same model as `session.setAttribute("user", userObject)` in Lab 4
+
+Lab 4 also introduced shopping cart state management using sessions — Phase 3 of our project will build on this using the `shopping_cart_items` table.
+
+---
 
 ### Strategy Pattern (GoF Behavioral)
-**File:** `Frontend/src/utils/sortStrategies.js`
+**From GoF design pattern lectures.**
 
-Each sorting option (price low-to-high, name A-Z, etc.) is a strategy object:
+Each sorting option is a strategy — a swappable object with a `key` and `label`:
+
 ```js
-{ key: 'price_asc', label: 'Price: Low to High' }
+// Frontend/src/utils/sortStrategies.js
+{ key: 'price_asc',  label: 'Price: Low to High' }
+{ key: 'price_desc', label: 'Price: High to Low' }
 ```
-The `CatalogPage` dropdown maps over `SORT_STRATEGIES` — it doesn't care how sorting works, just which strategy is selected. On the backend, `SORT_MAP` in `ProductDAO.js` does the same thing: it maps the user's chosen key to the actual SQL `ORDER BY` clause, which also prevents SQL injection since raw user input never touches the query string directly.
+
+`CatalogPage` maps over `SORT_STRATEGIES` to render the dropdown without knowing anything about the sorting logic. On the backend, `SORT_MAP` in `ProductDAO.js` maps the selected key to the actual SQL `ORDER BY` clause — this also prevents SQL injection since user input never touches the query string directly.
+
+---
 
 ### Observer Pattern (GoF Behavioral)
-**File:** `Frontend/src/context/AuthContext.js`
+**From GoF design pattern lectures.**
 
-From the design pattern lectures — a subject notifies all its observers when state changes. Here:
-- `AuthProvider` is the **subject** — it holds the logged-in user object
-- Any page that calls `useAuth()` is an **observer** — it re-renders automatically when the user logs in or out
+A subject notifies all observers when its state changes. In our app:
 
-This is why the navbar on `CatalogPage` and `ProductDetailPage` both update to show "Hi, Maya" the moment you log in, without us passing the user object through every component manually (prop-drilling).
+- `AuthContext.js` (`AuthProvider`) is the **subject** — it holds the logged-in user
+- Any page that calls `useAuth()` is an **observer** — it re-renders automatically on login or logout
+
+This is why the navbar on `CatalogPage` and `ProductDetailPage` both immediately update to "Hi, Maya" when you log in, without passing the user object through every component.
+
+---
 
 ### Singleton Pattern (GoF Creational)
-**File:** `Backend/db/index.js`
+**From GoF design pattern lectures.**
 
-We create one `pg.Pool` instance for the whole application and export it. Every DAO file imports this same pool — they never create their own database connections. This is the Singleton pattern: one shared instance, one point of control.
+`Backend/db/index.js` creates one `pg.Pool` instance and exports it. Every DAO imports this same pool — they never open their own connections. One instance, one point of control.
 
 ---
 
 ## Database Design
 
-Tables in `01_schema.sql`:
+Tables defined in `Backend/db/init/01_schema.sql`:
 
 ```
-brands              — brand_id (serial), name
-categories          — category_id (serial), name
-products            — product_id (VARCHAR PK), brand_id, category_id, name,
-                      price_cents (INT), inventory_quantity, is_active (BOOL)
+brands              — brand_id (serial PK), name
+categories          — category_id (serial PK), name
+products            — product_id (VARCHAR PK), brand_id FK, category_id FK,
+                      name, price_cents (INT), inventory_quantity, is_active BOOL
 customers           — customer_id, first_name, last_name, email, password, is_admin
 addresses           — linked to customers
 payment_methods     — linked to customers
-shopping_cart_items — customer_id + product_id + quantity
+shopping_cart_items — customer_id + product_id + quantity  (ready for Phase 3)
 purchase_orders     — order header (customer, total, status)
 order_items         — order lines (order_id + product_id + qty + price snapshot)
-inventory_transactions — tracks stock movements
+inventory_transactions — tracks stock movements in/out
 ```
 
-A few decisions worth noting:
+**Key design decisions:**
 
-- **`price_cents` is an INT, not a DECIMAL** — avoids floating-point rounding errors when doing math on money. We divide by 100 only when displaying: `(priceCents / 100).toFixed(2)`.
-- **`product_id` is a VARCHAR** like `SNK-NIKE-DUNK` instead of a serial integer — makes URLs and seed data readable.
-- **`is_active` boolean** — lets us "soft delete" a product (hide it from the store) without actually removing the row, which keeps old order history intact.
-- **JOINs on every product query** — we join `brands` and `categories` so the API returns `"brand": "Nike"` instead of `"brand_id": 3`.
+- **`price_cents` is INT, not DECIMAL** — avoids floating-point rounding errors when doing arithmetic on money. We divide by 100 only at display time: `(priceCents / 100).toFixed(2)`. This is the same principle as working with fixed-point numbers in financial systems.
+
+- **`product_id` is VARCHAR** like `SNK-NIKE-DUNK` instead of a serial integer — makes URLs and seed data human-readable.
+
+- **`is_active` boolean** — lets us "soft delete" a product (hide it from the store) without deleting the database row, which keeps old order history intact. Lab 6 introduced the idea of database-backed catalogs; this extends it with lifecycle management.
+
+- **JOINs on every product query** — we join `brands` and `categories` so the API returns `"brand": "Nike"` instead of `"brand_id": 3`. In Lab 6 this was done with SQLite JOINs across BOOK, AUTHOR, and CATEGORY tables.
 
 ---
 
 ## Security Notes
 
-Things we applied from the course to avoid common vulnerabilities:
+Concepts applied from the course:
 
-- **Parameterized queries everywhere** — all user input goes through `$1, $2, ...` placeholders in `pg`. Never string-concatenated into SQL.
-- **SORT_MAP whitelist** — `ORDER BY` can't be parameterized in PostgreSQL, so we validate the sort key against a hardcoded whitelist in `ProductDAO.js` before it touches the query.
-- **Session cookies** — `express-session` manages login state server-side. The cookie just stores a session ID, not the user data itself.
+- **Parameterized queries** — all user input is passed through `$1, $2, ...` parameters in `pg`. Never string-concatenated into SQL. Lab 6 used `PreparedStatement` with `?` placeholders for the same reason.
+- **SORT_MAP whitelist** — `ORDER BY` cannot be parameterized in SQL, so the sort key is validated against a hardcoded object before it touches any query string.
+- **Server-side sessions** — `express-session` stores session data on the server. The browser only holds a session ID cookie, same as `HttpSession` in Lab 4.
 
 ---
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` to override the Docker defaults:
+Copy `.env.example` to `.env` to override Docker defaults:
 
-| Variable                | Default       | Notes                              |
-|-------------------------|---------------|------------------------------------|
-| `POSTGRES_DB`           | `sixoutside`  |                                    |
-| `POSTGRES_USER`         | `admin`       |                                    |
-| `POSTGRES_PASSWORD`     | `password`    | Change this in production          |
-| `POSTGRES_PORT`         | `5432`        |                                    |
-| `BACKEND_PORT`          | `5050`        |                                    |
-| `SESSION_SECRET`        | *(required)*  | Any random string works locally    |
-| `SESSION_COOKIE_SECURE` | `false`       | Set to `true` if deployed on HTTPS |
+| Variable                | Default       | Notes                               |
+|-------------------------|---------------|-------------------------------------|
+| `POSTGRES_DB`           | `sixoutside`  |                                     |
+| `POSTGRES_USER`         | `admin`       |                                     |
+| `POSTGRES_PASSWORD`     | `password`    | Change in production                |
+| `POSTGRES_PORT`         | `5432`        |                                     |
+| `BACKEND_PORT`          | `5050`        |                                     |
+| `SESSION_SECRET`        | *(required)*  | Any random string works locally     |
+| `SESSION_COOKIE_SECURE` | `false`       | Set `true` if deployed on HTTPS     |
 
 ---
 
 ## What's Coming in Phase 3
 
-The schema already has `shopping_cart_items`, `purchase_orders`, and `order_items` tables ready. Phase 3 will add:
+The schema already has `shopping_cart_items`, `purchase_orders`, and `order_items` tables ready to go. Phase 3 will add:
 
-- Add to Cart / view cart
-- Checkout flow
-- Order history
-- Admin inventory management
+- **Shopping cart** — add/remove items, update quantities (builds on session tracking from Lab 4)
+- **Checkout flow** — create an order from the cart
+- **Order history** — logged-in users can view past orders
+- **Admin inventory management** — update stock levels, manage products
