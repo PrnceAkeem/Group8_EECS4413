@@ -44,7 +44,29 @@ async function getProduct(req, res) {
   }
 }
 
+async function listBrands(req, res) {
+  try {
+    const brands = await ProductDAO.getDistinctBrands();
+    return res.status(200).json({ brands });
+  } catch (error) {
+    console.error('listBrands error:', error);
+    return res.status(500).json({ error: 'server_error', message: 'An unexpected error occurred' });
+  }
+}
+
+async function listCategories(req, res) {
+  try {
+    const categories = await ProductDAO.getDistinctCategories();
+    return res.status(200).json({ categories });
+  } catch (error) {
+    console.error('listCategories error:', error);
+    return res.status(500).json({ error: 'server_error', message: 'An unexpected error occurred' });
+  }
+}
+
 module.exports = {
   listProducts,
-  getProduct
+  getProduct,
+  listBrands,
+  listCategories
 };

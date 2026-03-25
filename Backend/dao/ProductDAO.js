@@ -124,9 +124,35 @@ async function getProducts({ brand, category, q, sort } = {}) {
   return result.rows.map(mapProduct);
 }
 
+// Returns every brand that has at least one active product
+async function getDistinctBrands() {
+  const result = await db.query(
+    `SELECT DISTINCT b.name
+     FROM brands b
+     JOIN products p ON p.brand_id = b.brand_id
+     WHERE p.is_active = TRUE
+     ORDER BY b.name ASC`
+  );
+  return result.rows.map((r) => r.name);
+}
+
+// Returns every category that has at least one active product
+async function getDistinctCategories() {
+  const result = await db.query(
+    `SELECT DISTINCT c.name
+     FROM categories c
+     JOIN products p ON p.category_id = c.category_id
+     WHERE p.is_active = TRUE
+     ORDER BY c.name ASC`
+  );
+  return result.rows.map((r) => r.name);
+}
+
 module.exports = {
   getAllProducts,
   getProductById,
   getProducts,
+  getDistinctBrands,
+  getDistinctCategories,
   VALID_SORT_KEYS: Object.keys(SORT_MAP)
 };

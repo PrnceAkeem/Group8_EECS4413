@@ -118,8 +118,7 @@ function LandingPage() {
         <div className="top-banner-content">
           <p className="banner-label">Streetwear Footwear</p>
           <p className="banner-copy">
-            Shop trending sneakers, everyday essentials, and the newest drops in
-            one place.
+            Shop trending sneakers, everyday essentials, and the newest drops in one place.
           </p>
         </div>
       </section>
@@ -180,8 +179,7 @@ function LandingPage() {
             <details
               key={group.title}
               className="filter-dropdown"
-              open={index === 0}
-            >
+              open={index === 0}>
               <summary>{group.title}</summary>
 
               <div className="filter-options">
