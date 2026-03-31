@@ -124,18 +124,18 @@ function LandingPage() {
       </section>
 
       <nav className="category-tabs">
-        <button className="tab active" type="button">
+        <Link to="/catalog?category=New%20Arrivals" className="tab active">
           New Arrivals
-        </button>
-        <button className="tab" type="button">
+        </Link>
+        <Link to="/catalog?category=Men" className="tab">
           Men
-        </button>
-        <button className="tab" type="button">
+        </Link>
+        <Link to="/catalog?category=Women" className="tab">
           Women
-        </button>
-        <button className="tab" type="button">
+        </Link>
+        <Link to="/catalog?category=Kids" className="tab">
           Kids
-        </button>
+        </Link>
       </nav>
 
       <main className="store-content">
@@ -163,8 +163,11 @@ function LandingPage() {
                   <h3>{product.name}</h3>
                   <p className="product-category">{product.category}</p>
                   <p className="product-price">{product.price}</p>
-                  <button className="product-btn" type="button">
-                    View Product
+                  <button
+                    className="product-btn"
+                    type="button"
+                    onClick={() => window.location.href = `/catalog?category=${encodeURIComponent(product.category)}`}
+                    > View Product
                   </button>
                 </div>
               </div>
