@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const products = [
   {
@@ -94,7 +94,16 @@ const filterGroups = [
   },
 ];
 
+const AUDIENCE_MAP = {
+  'New Arrivals': 'new-arrivals',
+  Men: 'men',
+  Women: 'women',
+  Kids: 'kids'
+};
+
 function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="store-page">
       <header className="store-header">
@@ -124,16 +133,16 @@ function LandingPage() {
       </section>
 
       <nav className="category-tabs">
-        <Link to="/catalog?category=New%20Arrivals" className="tab active">
+        <Link to="/catalog?audience=new-arrivals" className="tab active">
           New Arrivals
         </Link>
-        <Link to="/catalog?category=Men" className="tab">
+        <Link to="/catalog?audience=men" className="tab">
           Men
         </Link>
-        <Link to="/catalog?category=Women" className="tab">
+        <Link to="/catalog?audience=women" className="tab">
           Women
         </Link>
-        <Link to="/catalog?category=Kids" className="tab">
+        <Link to="/catalog?audience=kids" className="tab">
           Kids
         </Link>
       </nav>
@@ -166,8 +175,11 @@ function LandingPage() {
                   <button
                     className="product-btn"
                     type="button"
-                    onClick={() => window.location.href = `/catalog?category=${encodeURIComponent(product.category)}`}
-                    > View Product
+                    onClick={() =>
+                      navigate(`/catalog?audience=${AUDIENCE_MAP[product.category] || 'new-arrivals'}`)
+                    }
+                  >
+                    View Product
                   </button>
                 </div>
               </div>

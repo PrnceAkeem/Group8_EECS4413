@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchProductById } from '../services/catalogApi';
-import { useAuth } from '../context/AuthContext';
+// TODO (item 23): import addToCart from cartApi and useAuth from AuthContext
+// import { addToCart } from '../services/cartApi';
+// import { useAuth } from '../context/AuthContext';
 
 // ProductDetailPage — shows a single product fetched by its ID from the URL
 // URL shape: /catalog/:id   e.g. /catalog/SNK-NIKE-AF1
@@ -12,12 +14,13 @@ import { useAuth } from '../context/AuthContext';
 function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  // TODO (item 23): const { user, logout } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [error, setError]     = useState(null);
+  // TODO (item 23): add cartMessage and addingToCart state
 
   useEffect(() => {
     setLoading(true);
@@ -42,6 +45,10 @@ function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // TODO (item 23): implement handleAddToCart
+  // - If user not logged in, navigate to /login with state { from: /catalog/:id }
+  // - Call addToCart(product.productId, 1) and show success/error message
+
   return (
     <div className="store-page">
       <header className="store-header">
@@ -49,23 +56,7 @@ function ProductDetailPage() {
 
         <div className="store-actions">
           <Link to="/catalog" className="header-link">Back to Catalog</Link>
-          {user ? (
-            <>
-              <span className="header-link">Hi, {user.firstName}</span>
-              <button
-                className="header-link filled"
-                style={{ border: 'none', cursor: 'pointer' }}
-                onClick={logout}
-              >
-                Sign Out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login"    className="header-link">Sign In</Link>
-              <Link to="/register" className="header-link filled">Sign Up</Link>
-            </>
-          )}
+          {/* TODO (item 23): show user name + Sign Out if logged in, Sign In / Sign Up if guest */}
         </div>
       </header>
 
@@ -138,14 +129,7 @@ function ProductDetailPage() {
                   : 'Out of Stock'}
               </p>
 
-              <button
-                className="product-btn"
-                type="button"
-                style={{ width: '100%' }}
-                onClick={() => alert('Add to cart — coming in Phase 3!')}
-              >
-                Add to Cart
-              </button>
+              {/* TODO (item 23): Add to Cart button — calls handleAddToCart, disabled when out of stock */}
 
               <button
                 className="product-btn"

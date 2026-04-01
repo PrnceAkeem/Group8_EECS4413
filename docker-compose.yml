@@ -37,5 +37,14 @@ services:
       - "${BACKEND_PORT:-5050}:5050"
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./Frontend
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    restart: unless-stopped
+
 volumes:
   postgres_data:

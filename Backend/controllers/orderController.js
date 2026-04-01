@@ -1,5 +1,12 @@
 const OrderDAO = require('../dao/OrderDAO');
+const CartDAO = require('../dao/CartDAO');
 const PaymentService = require('../services/PaymentService');
+
+function computeSubtotalCents(items) {
+  return items.reduce((total, item) => {
+    return total + Number(item.price_cents) * Number(item.quantity);
+  }, 0);
+}
 
 async function placeOrder(req, res) {
   try {
@@ -23,17 +30,30 @@ async function placeOrder(req, res) {
       });
     }
 
-    const paymentResult = await PaymentService.processPayment({
+    const checkoutDetails = await OrderDAO.validateCheckoutDetails(
       customerId,
-      paymentMethodId: parsedPaymentMethodId
+      parsedShippingAddressId,
+      parsedPaymentMethodId
+    );
+
+    const cartItems = await CartDAO.getCartByCustomer(customerId);
+    if (cartItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cart is empty.'
+      });
+    }
+
+    const subtotalCents = computeSubtotalCents(cartItems);
+    const paymentResult = await PaymentService.processPayment({
+      amountCents: subtotalCents,
+      cardLast4: checkoutDetails.cardLast4
     });
 
-    if (!paymentResult.success) {
+    if (!paymentResult.approved) {
       return res.status(402).json({
         success: false,
-        message: paymentResult.message,
-        paymentStatus: paymentResult.paymentStatus,
-        attemptCount: paymentResult.attemptCount
+        message: paymentResult.reason || 'Credit Card Authorization Failed.'
       });
     }
 
@@ -46,8 +66,7 @@ async function placeOrder(req, res) {
     return res.status(201).json({
       success: true,
       message: 'Order placed successfully.',
-      paymentStatus: paymentResult.paymentStatus,
-      attemptCount: paymentResult.attemptCount,
+      payment: paymentResult,
       ...createdOrder
     });
   } catch (error) {

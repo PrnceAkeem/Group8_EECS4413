@@ -1,52 +1,102 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchCatalog, fetchBrands, fetchCategories } from '../services/catalogApi';
+import { fetchCatalog, fetchBrands } from '../services/catalogApi';
 import { SORT_STRATEGIES } from '../utils/sortStrategies';
 import { useAuth } from '../context/AuthContext';
 
+const TOP_TABS = [
+  { key: 'new-arrivals', label: 'New Arrivals' },
+  { key: 'men', label: 'Men' },
+  { key: 'women', label: 'Women' },
+  { key: 'kids', label: 'Kids' }
+];
+
+const COLOR_OPTIONS = ['Black', 'White', 'Red', 'Blue'];
+const SIZE_OPTIONS = ['7', '8', '9', '10', '11'];
+const PRICE_OPTIONS = ['Under $150', '$150 - $200', 'Over $200'];
+
+function parseRange(sizeRange) {
+  if (!sizeRange) return null;
+  const match = sizeRange.match(/(\d+)\s*-\s*(\d+)/);
+  if (!match) return null;
+  return {
+    min: Number.parseInt(match[1], 10),
+    max: Number.parseInt(match[2], 10)
+  };
+}
+
+function sizeInRange(sizeRange, size) {
+  const range = parseRange(sizeRange);
+  if (!range) return false;
+  const n = Number.parseInt(size, 10);
+  return n >= range.min && n <= range.max;
+}
+
+function categoryFromTab(product, tabKey) {
+  if (tabKey === 'new-arrivals') {
+    return (product.releaseYear || 0) >= 2024;
+  }
+
+  if (tabKey === 'men') {
+    return ['Basketball', 'Running'].includes(product.category);
+  }
+
+  if (tabKey === 'women') {
+    return product.category === 'Lifestyle';
+  }
+
+  if (tabKey === 'kids') {
+    return ['Skate', 'Trail Running'].includes(product.category);
+  }
+
+  return true;
+}
+
+function displayAudience(product) {
+  if ((product.releaseYear || 0) >= 2024) return 'New Arrivals';
+  if (['Basketball', 'Running'].includes(product.category)) return 'Men';
+  if (product.category === 'Lifestyle') return 'Women';
+  if (['Skate', 'Trail Running'].includes(product.category)) return 'Kids';
+  return product.category;
+}
+
 function CatalogPage() {
-  // useSearchParams reads/writes the URL query string (?brand=Nike&sort=price_asc)
-  // This means refreshing the page keeps your filter selection
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [products, setProducts]     = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
-  const [brands, setBrands]         = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [brands, setBrands] = useState([]);
 
-  // Fetch filter options once on mount — data-driven from the DB
-  useEffect(() => {
-    fetchBrands().then(setBrands).catch(() => {});
-    fetchCategories().then(setCategories).catch(() => {});
-  }, []);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
+  const [selectedPrices, setSelectedPrices] = useState([]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
 
-  // Read initial values from the URL (so refresh preserves state)
-  const brand    = searchParams.get('brand')    || '';
-  const category = searchParams.get('category') || '';
-  const sort     = searchParams.get('sort')     || '';
-  const q        = searchParams.get('q')        || '';
+  const q = searchParams.get('q') || '';
+  const sort = searchParams.get('sort') || '';
+  const audience = searchParams.get('audience') || 'new-arrivals';
 
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  // Re-fetch whenever any filter/sort/search changes
+  useEffect(() => {
+    fetchBrands().then(setBrands).catch(() => setBrands([]));
+  }, []);
+
   useEffect(() => {
     setLoading(true);
     setError(null);
 
     fetchCatalog({
-      brand:    brand    || undefined,
-      category: category || undefined,
-      sort:     sort     || undefined,
-      q:        q        || undefined
+      sort: sort || undefined,
+      q: q || undefined
     })
       .then(setProducts)
       .catch(() => setError('Failed to load products. Please try again.'))
       .finally(() => setLoading(false));
-  }, [brand, category, sort, q]);
+  }, [sort, q]);
 
-  // Helper: update one param in the URL without wiping the others
   function setParam(key, value) {
     const next = new URLSearchParams(searchParams);
     if (value) {
@@ -57,19 +107,84 @@ function CatalogPage() {
     setSearchParams(next);
   }
 
-  // Clear all filters + sort + search at once
-  function clearAll() {
-    setSearchParams({});
+  function toggleItem(current, setCurrent, value) {
+    if (current.includes(value)) {
+      setCurrent(current.filter((item) => item !== value));
+      return;
+    }
+    setCurrent([...current, value]);
   }
 
-  const hasFilters = brand || category || sort || q;
+  function clearAll() {
+    setSelectedColors([]);
+    setSelectedSizes([]);
+    setSelectedPrices([]);
+    setSelectedBrands([]);
+    setSearchParams({ audience: 'new-arrivals' });
+  }
+
+  const brandOptions = useMemo(() => {
+    if (brands.length > 0) return brands;
+    return [...new Set(products.map((p) => p.brand))].sort();
+  }, [brands, products]);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      if (!categoryFromTab(product, audience)) {
+        return false;
+      }
+
+      if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) {
+        return false;
+      }
+
+      if (
+        selectedColors.length > 0 &&
+        !selectedColors.some((color) =>
+          (product.colorway || '').toLowerCase().includes(color.toLowerCase())
+        )
+      ) {
+        return false;
+      }
+
+      if (
+        selectedSizes.length > 0 &&
+        !selectedSizes.some((size) => sizeInRange(product.sizeRange, size))
+      ) {
+        return false;
+      }
+
+      if (selectedPrices.length > 0) {
+        const inAnyRange = selectedPrices.some((priceLabel) => {
+          if (priceLabel === 'Under $150') return product.priceCents < 15000;
+          if (priceLabel === '$150 - $200') {
+            return product.priceCents >= 15000 && product.priceCents <= 20000;
+          }
+          if (priceLabel === 'Over $200') return product.priceCents > 20000;
+          return false;
+        });
+
+        if (!inAnyRange) return false;
+      }
+
+      return true;
+    });
+  }, [products, audience, selectedBrands, selectedColors, selectedSizes, selectedPrices]);
+
+  const hasFilters =
+    q ||
+    sort ||
+    audience !== 'new-arrivals' ||
+    selectedColors.length ||
+    selectedSizes.length ||
+    selectedPrices.length ||
+    selectedBrands.length;
 
   return (
     <div className="store-page">
       <header className="store-header">
         <div className="store-logo">6ixOutside</div>
 
-        {/* Search input — updates ?q= in the URL on every keystroke */}
         <div className="store-search">
           <input
             type="text"
@@ -82,6 +197,10 @@ function CatalogPage() {
         <div className="store-actions">
           {user ? (
             <>
+              <Link to="/cart" className="header-link">Cart</Link>
+              <Link to="/orders" className="header-link">Orders</Link>
+              <Link to="/profile" className="header-link">Profile</Link>
+              {user.isAdmin && <Link to="/admin" className="header-link">Admin</Link>}
               <span className="header-link">Hi, {user.firstName}</span>
               <button
                 className="header-link filled"
@@ -93,7 +212,7 @@ function CatalogPage() {
             </>
           ) : (
             <>
-              <Link to="/login"    className="header-link">Sign In</Link>
+              <Link to="/login" className="header-link">Sign In</Link>
               <Link to="/register" className="header-link filled">Sign Up</Link>
             </>
           )}
@@ -109,12 +228,24 @@ function CatalogPage() {
         </div>
       </section>
 
+      <nav className="category-tabs">
+        {TOP_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            className={`tab ${audience === tab.key ? 'active' : ''}`}
+            onClick={() => setParam('audience', tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
       <main className="store-content">
         <section className="products-section">
           <div className="products-topbar">
-            <h2>All Products {!loading && `(${products.length})`}</h2>
+            <h2>Featured Products {!loading && `(${filteredProducts.length})`}</h2>
 
-            {/* Sort dropdown — Strategy pattern: each option maps to a SORT_STRATEGIES entry */}
             <select
               className="sort-select"
               value={sort}
@@ -128,15 +259,15 @@ function CatalogPage() {
           </div>
 
           {loading && <p className="state-message">Loading products...</p>}
-          {error   && <p className="state-message state-error">{error}</p>}
+          {error && <p className="state-message state-error">{error}</p>}
 
-          {!loading && !error && products.length === 0 && (
+          {!loading && !error && filteredProducts.length === 0 && (
             <p className="state-message">No products found.</p>
           )}
 
-          {!loading && !error && products.length > 0 && (
+          {!loading && !error && filteredProducts.length > 0 && (
             <div className="products-grid">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <div key={product.productId} className="product-card">
                   <div className="product-image-wrap">
                     <img src={product.imageUrl} alt={product.name} />
@@ -145,10 +276,8 @@ function CatalogPage() {
                   <div className="product-details">
                     <p className="product-brand">{product.brand}</p>
                     <h3>{product.name}</h3>
-                    <p className="product-category">{product.category}</p>
-                    <p className="product-price">
-                      ${(product.priceCents / 100).toFixed(2)}
-                    </p>
+                    <p className="product-category">{displayAudience(product)}</p>
+                    <p className="product-price">${(product.priceCents / 100).toFixed(2)}</p>
                     <button
                       className="product-btn"
                       type="button"
@@ -163,29 +292,72 @@ function CatalogPage() {
           )}
         </section>
 
-        {/* Filters sidebar */}
         <aside className="filters-panel">
           <h3>Filters</h3>
 
-          <div className="filter-dropdown">
-            <label>Brand</label>
-            <select value={brand} onChange={(e) => setParam('brand', e.target.value)}>
-              <option value="">All Brands</option>
-              {brands.map((b) => (
-                <option key={b} value={b}>{b}</option>
+          <details className="filter-dropdown" open>
+            <summary>Colors</summary>
+            <div className="filter-options">
+              {COLOR_OPTIONS.map((color) => (
+                <label key={color}>
+                  <input
+                    type="checkbox"
+                    checked={selectedColors.includes(color)}
+                    onChange={() => toggleItem(selectedColors, setSelectedColors, color)}
+                  />
+                  <span>{color}</span>
+                </label>
               ))}
-            </select>
-          </div>
+            </div>
+          </details>
 
-          <div className="filter-dropdown">
-            <label>Category</label>
-            <select value={category} onChange={(e) => setParam('category', e.target.value)}>
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
+          <details className="filter-dropdown">
+            <summary>Size</summary>
+            <div className="filter-options">
+              {SIZE_OPTIONS.map((size) => (
+                <label key={size}>
+                  <input
+                    type="checkbox"
+                    checked={selectedSizes.includes(size)}
+                    onChange={() => toggleItem(selectedSizes, setSelectedSizes, size)}
+                  />
+                  <span>{size}</span>
+                </label>
               ))}
-            </select>
-          </div>
+            </div>
+          </details>
+
+          <details className="filter-dropdown">
+            <summary>Price</summary>
+            <div className="filter-options">
+              {PRICE_OPTIONS.map((priceOption) => (
+                <label key={priceOption}>
+                  <input
+                    type="checkbox"
+                    checked={selectedPrices.includes(priceOption)}
+                    onChange={() => toggleItem(selectedPrices, setSelectedPrices, priceOption)}
+                  />
+                  <span>{priceOption}</span>
+                </label>
+              ))}
+            </div>
+          </details>
+
+          <details className="filter-dropdown">
+            <summary>Brand</summary>
+            <div className="filter-options">
+              {brandOptions.map((brandOption) => (
+                <label key={brandOption}>
+                  <input
+                    type="checkbox"
+                    checked={selectedBrands.includes(brandOption)}
+                    onChange={() => toggleItem(selectedBrands, setSelectedBrands, brandOption)}
+                  />
+                  <span>{brandOption}</span>
+                </label>
+              ))}
+            </div>
+          </details>
 
           {hasFilters && (
             <button

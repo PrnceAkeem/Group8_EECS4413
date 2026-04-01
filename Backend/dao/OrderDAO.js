@@ -91,6 +91,44 @@ async function validateCheckoutOwnership(
   }
 }
 
+async function validateCheckoutDetails(customerId, shippingAddressId, paymentMethodId) {
+  const addressResult = await pool.query(
+    `
+      SELECT address_id
+      FROM addresses
+      WHERE address_id = $1
+        AND customer_id = $2
+    `,
+    [shippingAddressId, customerId]
+  );
+
+  if (addressResult.rows.length === 0) {
+    const error = new Error('Shipping address does not belong to this customer.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const paymentResult = await pool.query(
+    `
+      SELECT payment_method_id, card_last4
+      FROM payment_methods
+      WHERE payment_method_id = $1
+        AND customer_id = $2
+    `,
+    [paymentMethodId, customerId]
+  );
+
+  if (paymentResult.rows.length === 0) {
+    const error = new Error('Payment method does not belong to this customer.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return {
+    cardLast4: paymentResult.rows[0].card_last4
+  };
+}
+
 async function createOrder({
   customerId,
   shippingAddressId,
@@ -241,7 +279,7 @@ async function createOrder({
       await client.query(insertInventoryTransactionQuery, [
         item.product_id,
         -quantity,
-        'purchase',
+        'order_placed',
         createdOrder.order_id
       ]);
     }
@@ -345,6 +383,7 @@ async function getOrderById(orderId, customerId) {
 }
 
 module.exports = {
+  validateCheckoutDetails,
   createOrder,
   getOrdersByCustomer,
   getOrderById

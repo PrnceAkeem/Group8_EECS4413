@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 // AuthContext — Observer Pattern (GoF Behavioral)
 //
@@ -14,17 +14,44 @@ import { createContext, useContext, useState } from 'react';
 // react to auth changes without prop-drilling through every component.
 
 const AuthContext = createContext(null);
+const AUTH_STORAGE_KEY = 'sixoutside_user';
 
 export function AuthProvider({ children }) {
   // user shape: { customerId, firstName, email, isAdmin }  — or null when logged out
   // This is set from the server response after a successful login.
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!saved) return null;
+
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+  }, [user]);
 
   function login(userData) {
     setUser(userData);
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch {
+      // Local state reset still signs out the UI when network call fails.
+    }
+
     setUser(null);
   }
 

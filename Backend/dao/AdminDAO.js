@@ -91,13 +91,16 @@ async function getAllOrders(filters = {}) {
     `);
   }
 
-  if (filters.dateFrom !== undefined && filters.dateFrom !== '') {
-    values.push(filters.dateFrom);
+  const from = filters.from ?? filters.dateFrom;
+  const to = filters.to ?? filters.dateTo;
+
+  if (from !== undefined && from !== '') {
+    values.push(from);
     conditions.push(`po.placed_at >= $${values.length}::timestamptz`);
   }
 
-  if (filters.dateTo !== undefined && filters.dateTo !== '') {
-    values.push(filters.dateTo);
+  if (to !== undefined && to !== '') {
+    values.push(to);
     conditions.push(`po.placed_at <= $${values.length}::timestamptz`);
   }
 

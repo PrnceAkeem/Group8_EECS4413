@@ -2,7 +2,16 @@ const AdminDAO = require('../dao/AdminDAO');
 
 async function listOrders(req, res) {
   try {
-    const { status, customerId, paymentStatus, productId, dateFrom, dateTo } = req.query;
+    const {
+      status,
+      customerId,
+      paymentStatus,
+      productId,
+      from,
+      to,
+      dateFrom,
+      dateTo
+    } = req.query;
 
     let parsedCustomerId;
     if (customerId !== undefined && customerId !== '') {
@@ -18,19 +27,19 @@ async function listOrders(req, res) {
     const parsedProductId =
       productId === undefined || productId === '' ? undefined : productId.trim();
 
-    const parsedDateFrom =
-      dateFrom === undefined || dateFrom === '' ? undefined : dateFrom.trim();
+    const rawFrom = from ?? dateFrom;
+    const rawTo = to ?? dateTo;
 
-    const parsedDateTo =
-      dateTo === undefined || dateTo === '' ? undefined : dateTo.trim();
+    const parsedFrom = rawFrom === undefined || rawFrom === '' ? undefined : rawFrom.trim();
+    const parsedTo = rawTo === undefined || rawTo === '' ? undefined : rawTo.trim();
 
     const orders = await AdminDAO.getAllOrders({
       status,
       customerId: parsedCustomerId,
       paymentStatus,
       productId: parsedProductId,
-      dateFrom: parsedDateFrom,
-      dateTo: parsedDateTo
+      from: parsedFrom,
+      to: parsedTo
     });
 
     return res.status(200).json({

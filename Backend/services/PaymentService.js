@@ -1,29 +1,37 @@
-let paymentAttemptCount = 0;
+let requestCount = 0;
 
-async function processPayment(paymentInfo = {}) {
-  paymentAttemptCount += 1;
+async function processPayment({ amountCents = 0, cardLast4 = '0000' } = {}) {
+  requestCount += 1;
 
-  const isDenied = paymentAttemptCount % 3 === 0;
+  const approved = requestCount % 3 !== 0;
+  const result = approved
+    ? {
+        approved: true,
+        requestCount
+      }
+    : {
+        approved: false,
+        reason: 'Credit Card Authorization Failed.',
+        requestCount
+      };
 
-  if (isDenied) {
-    return {
-      success: false,
-      paymentStatus: 'declined',
-      attemptCount: paymentAttemptCount,
-      message: 'Credit Card Authorization Failed.'
-    };
-  }
+  // Observer-style side effect used as a mock notification hook.
+  console.log(
+    '[PaymentService]',
+    JSON.stringify({
+      requestCount,
+      amountCents,
+      cardLast4,
+      approved,
+      reason: result.reason || null
+    })
+  );
 
-  return {
-    success: true,
-    paymentStatus: 'approved',
-    attemptCount: paymentAttemptCount,
-    message: 'Payment approved by mock payment service.'
-  };
+  return result;
 }
 
 function getPaymentAttemptCount() {
-  return paymentAttemptCount;
+  return requestCount;
 }
 
 module.exports = {

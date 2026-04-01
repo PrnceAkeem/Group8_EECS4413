@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,6 +9,7 @@ function LoginPage() {
   const [message, setMessage] = useState('');
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   async function handleSubmit(e) {
@@ -24,7 +25,8 @@ function LoginPage() {
       // Notify AuthContext so navbar and other observers update immediately
       login(response.data.user);
       setMessage(`Welcome, ${response.data.user.firstName}!`);
-      setTimeout(() => navigate('/catalog'), 1000);
+      const nextPath = location.state?.from || '/catalog';
+      setTimeout(() => navigate(nextPath), 1000);
     } catch (error) {
       setMessage(error.response?.data?.message || 'Login failed.');
     }

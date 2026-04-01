@@ -1,25 +1,21 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: '/api/catalog'
-});
+import apiClient from './apiClient';
 
 export async function fetchCatalog(params = {}) {
-  const { data } = await api.get('/', { params });
+  const { data } = await apiClient.get('/api/catalog', { params });
   return data.products;
 }
 
 export async function fetchProductById(id) {
-  const { data } = await api.get(`/${id}`);
+  const { data } = await apiClient.get(`/api/catalog/${id}`);
   return data.product;
 }
 
 export async function fetchBrands() {
-  const { data } = await api.get('/brands');
+  const { data } = await apiClient.get('/api/catalog/brands');
   return data.brands;
 }
 
 export async function fetchCategories() {
-  const { data } = await api.get('/categories');
+  const { data } = await apiClient.get('/api/catalog/categories');
   return data.categories;
 }
