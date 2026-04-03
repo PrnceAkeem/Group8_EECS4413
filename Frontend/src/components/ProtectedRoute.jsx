@@ -1,7 +1,18 @@
-// TODO: Check if user is logged in (useAuth). If not, redirect to /login.
-// If adminOnly prop is true, also check user.isAdmin — redirect to / if not admin.
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function ProtectedRoute({ children, adminOnly = false }) {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (adminOnly && !user.isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 }
 

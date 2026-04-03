@@ -1,0 +1,110 @@
+const AdminDAO = require('../../dao/AdminDAO');
+
+async function listCustomers(req, res) {
+  try {
+    const customers = await AdminDAO.getAllCustomers();
+
+    return res.status(200).json({
+      success: true,
+      customers
+    });
+  } catch (error) {
+    console.error('Admin list customers error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while fetching customers.'
+    });
+  }
+}
+
+async function patchCustomer(req, res) {
+  try {
+    const customerId = Number.parseInt(req.params.id, 10);
+
+    if (Number.isNaN(customerId) || customerId <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer id must be a positive integer.'
+      });
+    }
+
+    const { firstName, lastName, email, phone, isAdmin } = req.body;
+    const updates = {};
+
+    if (firstName !== undefined) {
+      if (typeof firstName !== 'string' || !firstName.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'firstName must be a non-empty string.'
+        });
+      }
+      updates.firstName = firstName.trim();
+    }
+
+    if (lastName !== undefined) {
+      if (typeof lastName !== 'string' || !lastName.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'lastName must be a non-empty string.'
+        });
+      }
+      updates.lastName = lastName.trim();
+    }
+
+    if (email !== undefined) {
+      if (typeof email !== 'string' || !email.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'email must be a non-empty string.'
+        });
+      }
+      updates.email = email.trim().toLowerCase();
+    }
+
+    if (phone !== undefined) {
+      if (phone !== null && typeof phone !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'phone must be a string or null.'
+        });
+      }
+      updates.phone = phone === null ? null : phone.trim();
+    }
+
+    if (isAdmin !== undefined) {
+      if (typeof isAdmin !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: 'isAdmin must be a boolean.'
+        });
+      }
+      updates.isAdmin = isAdmin;
+    }
+
+    const customer = await AdminDAO.updateCustomer(customerId, updates);
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Customer updated successfully.',
+      customer
+    });
+  } catch (error) {
+    console.error('Admin patch customer error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while updating customer.'
+    });
+  }
+}
+
+module.exports = {
+  listCustomers,
+  patchCustomer
+};

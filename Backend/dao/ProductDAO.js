@@ -1,5 +1,33 @@
 const db = require('../db');
 
+const APPROVED_PRODUCT_IDS = [
+  'SNK-NIKE-AF1',
+  'SNK-NIKE-DUNK',
+  'SNK-NIKE-AM90',
+  'SNK-NIKE-AM95',
+  'SNK-NIKE-V5',
+  'SNK-JOR-AJ1',
+  'SNK-JOR-AJ3',
+  'SNK-JOR-RET7',
+  'SNK-JOR-AJ11',
+  'SNK-JOR-AJ12',
+  'SNK-ADI-SAMBA',
+  'SNK-ADI-GAZ',
+  'SNK-ADI-CAMP',
+  'SNK-ADI-SPEZ',
+  'SNK-ADI-YZY',
+  'SNK-CON-CTAS',
+  'SNK-CON-C70',
+  'SNK-CON-ONEST',
+  'SNK-CON-RSH',
+  'SNK-CON-SHAI',
+  'SNK-NB-550',
+  'SNK-NB-2002R',
+  'SNK-NB-1906R',
+  'SNK-NB-9060',
+  'SNK-NB-530'
+];
+
 function mapProduct(row) {
   if (!row) return null;
   return {
@@ -37,7 +65,9 @@ async function getAllProducts() {
      JOIN brands     b ON b.brand_id    = p.brand_id
      JOIN categories c ON c.category_id = p.category_id
      WHERE p.is_active = TRUE
-     ORDER BY p.name ASC`
+       AND p.product_id = ANY($1::text[])
+     ORDER BY p.name ASC`,
+    [APPROVED_PRODUCT_IDS]
   );
   return result.rows.map(mapProduct);
 }
@@ -61,8 +91,9 @@ async function getProductById(productId) {
      JOIN brands     b ON b.brand_id    = p.brand_id
      JOIN categories c ON c.category_id = p.category_id
      WHERE p.product_id = $1
-       AND p.is_active = TRUE`,
-    [productId]
+       AND p.is_active = TRUE
+       AND p.product_id = ANY($2::text[])`,
+    [productId, APPROVED_PRODUCT_IDS]
   );
   return mapProduct(result.rows[0]);
 }
@@ -77,8 +108,8 @@ const SORT_MAP = {
 async function getProducts({ brand, category, q, sort } = {}) {
   const orderBy = SORT_MAP[sort] || 'p.name ASC';
 
-  const conditions = ['p.is_active = TRUE'];
-  const values = [];
+  const values = [APPROVED_PRODUCT_IDS];
+  const conditions = ['p.is_active = TRUE', 'p.product_id = ANY($1::text[])'];
 
   if (brand) {
     values.push(brand);
@@ -131,7 +162,9 @@ async function getDistinctBrands() {
      FROM brands b
      JOIN products p ON p.brand_id = b.brand_id
      WHERE p.is_active = TRUE
-     ORDER BY b.name ASC`
+       AND p.product_id = ANY($1::text[])
+     ORDER BY b.name ASC`,
+    [APPROVED_PRODUCT_IDS]
   );
   return result.rows.map((r) => r.name);
 }
@@ -143,7 +176,9 @@ async function getDistinctCategories() {
      FROM categories c
      JOIN products p ON p.category_id = c.category_id
      WHERE p.is_active = TRUE
-     ORDER BY c.name ASC`
+       AND p.product_id = ANY($1::text[])
+     ORDER BY c.name ASC`,
+    [APPROVED_PRODUCT_IDS]
   );
   return result.rows.map((r) => r.name);
 }

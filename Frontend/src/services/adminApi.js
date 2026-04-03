@@ -1,25 +1,27 @@
-import apiClient from './apiClient';
+function notImplemented(name) {
+  throw new Error(`Phase 3 TODO: ${name} is not implemented yet.`);
+}
 
 export async function fetchAllOrders(filters = {}) {
-  // TODO: GET /api/admin/orders  (supports ?customerId=&productId=&from=&to=)
+  return notImplemented(`fetchAllOrders(${JSON.stringify(filters)})`);
 }
 
 export async function fetchCustomers() {
-  // TODO: GET /api/admin/customers
+  return notImplemented('fetchCustomers');
 }
 
 export async function updateCustomer(id, payload) {
-  // TODO: PATCH /api/admin/customers/:id
+  return notImplemented(`updateCustomer(${id}, ${JSON.stringify(payload)})`);
 }
 
 export async function fetchAllProducts() {
-  // TODO: GET /api/admin/products
+  return notImplemented('fetchAllProducts');
 }
 
 export async function updateProduct(id, payload) {
-  // TODO: PATCH /api/admin/products/:id
+  return notImplemented(`updateProduct(${id}, ${JSON.stringify(payload)})`);
 }
 
 export async function createProduct(payload) {
-  // TODO: POST /api/admin/products
+  return notImplemented(`createProduct(${JSON.stringify(payload)})`);
 }

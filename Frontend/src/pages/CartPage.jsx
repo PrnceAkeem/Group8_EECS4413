@@ -1,17 +1,18 @@
-import { Link } from 'react-router-dom';
-
-// TODO: Fetch cart items from cartApi.fetchCart() on mount.
-// Show a table with product name, unit price, quantity controls (+/-), line total.
-// Subtotal updates immediately when quantity changes.
-// "Remove" button calls cartApi.removeFromCart().
-// "Proceed to Checkout" button navigates to /checkout.
+import ScaffoldPage from '../components/ScaffoldPage';
 
 function CartPage() {
   return (
-    <div>
-      <h1>Cart</h1>
-      <Link to="/catalog">Back to Catalog</Link>
-    </div>
+    <ScaffoldPage
+      title="Cart"
+      description="This page is scaffolded for Phase 3 so teammates can implement cart behavior in parallel."
+      tasks={[
+        'Fetch cart items from cartApi.fetchCart() on mount',
+        'Render product rows with unit price, quantity controls, and line totals',
+        'Update subtotal live when quantity changes',
+        'Call cartApi.removeFromCart() for remove action',
+        'Wire Proceed to Checkout navigation to /checkout'
+      ]}
+    />
   );
 }
 

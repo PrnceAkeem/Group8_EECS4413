@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchCatalog, fetchBrands } from '../services/catalogApi';
 import { SORT_STRATEGIES } from '../utils/sortStrategies';
@@ -75,10 +75,12 @@ function CatalogPage() {
 
   const q = searchParams.get('q') || '';
   const sort = searchParams.get('sort') || '';
-  const audience = searchParams.get('audience') || 'new-arrivals';
+  const audience = searchParams.get('audience') || '';
 
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     fetchBrands().then(setBrands).catch(() => setBrands([]));
@@ -96,6 +98,19 @@ function CatalogPage() {
       .catch(() => setError('Failed to load products. Please try again.'))
       .finally(() => setLoading(false));
   }, [sort, q]);
+
+  useEffect(() => {
+    if (!isUserMenuOpen) return undefined;
+
+    function handleOutsideClick(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [isUserMenuOpen]);
 
   function setParam(key, value) {
     const next = new URLSearchParams(searchParams);
@@ -120,7 +135,7 @@ function CatalogPage() {
     setSelectedSizes([]);
     setSelectedPrices([]);
     setSelectedBrands([]);
-    setSearchParams({ audience: 'new-arrivals' });
+    setSearchParams({});
   }
 
   const brandOptions = useMemo(() => {
@@ -174,7 +189,15 @@ function CatalogPage() {
   const hasFilters =
     q ||
     sort ||
-    audience !== 'new-arrivals' ||
+    audience ||
+    selectedColors.length ||
+    selectedSizes.length ||
+    selectedPrices.length ||
+    selectedBrands.length;
+
+  const subsetFiltersActive =
+    q ||
+    audience ||
     selectedColors.length ||
     selectedSizes.length ||
     selectedPrices.length ||
@@ -196,20 +219,44 @@ function CatalogPage() {
 
         <div className="store-actions">
           {user ? (
-            <>
-              <Link to="/cart" className="header-link">Cart</Link>
-              <Link to="/orders" className="header-link">Orders</Link>
-              <Link to="/profile" className="header-link">Profile</Link>
-              {user.isAdmin && <Link to="/admin" className="header-link">Admin</Link>}
-              <span className="header-link">Hi, {user.firstName}</span>
+            <div className="user-menu" ref={userMenuRef}>
               <button
-                className="header-link filled"
-                style={{ border: 'none', cursor: 'pointer' }}
-                onClick={logout}
+                type="button"
+                className="header-link user-menu-trigger"
+                onClick={() => setIsUserMenuOpen((open) => !open)}
               >
-                Sign Out
+                {user.firstName}
               </button>
-            </>
+
+              {isUserMenuOpen && (
+                <div className="user-menu-dropdown">
+                  <Link to="/cart" className="user-menu-item" onClick={() => setIsUserMenuOpen(false)}>
+                    Cart
+                  </Link>
+                  <Link to="/orders" className="user-menu-item" onClick={() => setIsUserMenuOpen(false)}>
+                    Orders
+                  </Link>
+                  <Link to="/profile" className="user-menu-item" onClick={() => setIsUserMenuOpen(false)}>
+                    Profile
+                  </Link>
+                  {user.isAdmin && (
+                    <Link to="/admin" className="user-menu-item" onClick={() => setIsUserMenuOpen(false)}>
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    className="user-menu-item danger"
+                    onClick={async () => {
+                      setIsUserMenuOpen(false);
+                      await logout();
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link to="/login" className="header-link">Sign In</Link>
@@ -234,7 +281,7 @@ function CatalogPage() {
             key={tab.key}
             type="button"
             className={`tab ${audience === tab.key ? 'active' : ''}`}
-            onClick={() => setParam('audience', tab.key)}
+            onClick={() => setParam('audience', audience === tab.key ? '' : tab.key)}
           >
             {tab.label}
           </button>
@@ -244,7 +291,13 @@ function CatalogPage() {
       <main className="store-content">
         <section className="products-section">
           <div className="products-topbar">
-            <h2>Featured Products {!loading && `(${filteredProducts.length})`}</h2>
+            <h2>
+              Featured Products{' '}
+              {!loading &&
+                (subsetFiltersActive
+                  ? `(${filteredProducts.length} of ${products.length})`
+                  : `(${products.length})`)}
+            </h2>
 
             <select
               className="sort-select"

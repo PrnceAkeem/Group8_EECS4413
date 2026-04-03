@@ -34,15 +34,17 @@ Any other `sort` value → `400`.
 {
   "products": [
     {
-      "product_id": "SNK-NIKE-AF1",
+      "productId": "SNK-NIKE-AF1",
       "name": "Nike Air Force 1 Low",
+      "model": "Air Force 1",
       "brand": "Nike",
       "category": "Lifestyle",
       "colorway": "White / White",
-      "price_cents": 13000,
-      "inventory_quantity": 40,
-      "size_range": "US 6-14",
-      "image_url": "https://placehold.co/600x400?text=Air+Force+1"
+      "priceCents": 13000,
+      "inventoryQuantity": 40,
+      "releaseYear": 2024,
+      "sizeRange": "US 6-14",
+      "imageUrl": "https://placehold.co/600x400?text=Air+Force+1"
     }
   ]
 }
@@ -65,18 +67,18 @@ Returns a single product by `product_id`.
 ```json
 {
   "product": {
-    "product_id": "SNK-NIKE-AF1",
+    "productId": "SNK-NIKE-AF1",
     "name": "Nike Air Force 1 Low",
     "model": "Air Force 1",
     "brand": "Nike",
     "category": "Lifestyle",
     "description": "The original basketball shoe turned streetwear staple.",
     "colorway": "White / White",
-    "price_cents": 13000,
-    "inventory_quantity": 40,
-    "release_year": 2024,
-    "size_range": "US 6-14",
-    "image_url": "https://placehold.co/600x400?text=Air+Force+1"
+    "priceCents": 13000,
+    "inventoryQuantity": 40,
+    "releaseYear": 2024,
+    "sizeRange": "US 6-14",
+    "imageUrl": "https://placehold.co/600x400?text=Air+Force+1"
   }
 }
 ```

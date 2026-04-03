@@ -1,20 +1,18 @@
-import { Link } from 'react-router-dom';
-
-// TODO: On mount, load cart (cartApi.fetchCart) and profile (profileApi.fetchProfile) in parallel.
-// If cart is empty, redirect to /cart.
-// Show saved addresses in a dropdown + a form to add a new one (calls profileApi.saveAddress).
-// Show saved payment methods in a dropdown + a form to add a new one (calls profileApi.savePaymentMethod).
-// Show order summary: line items, subtotal, 13% HST tax, total.
-// "Confirm Order" calls orderApi.placeOrder(shippingAddressId, paymentMethodId).
-//   - On success (201): navigate to /orders/:id/confirmation
-//   - On 402 payment denied: show "Credit Card Authorization Failed." with Try Again / Cancel options.
+import ScaffoldPage from '../components/ScaffoldPage';
 
 function CheckoutPage() {
   return (
-    <div>
-      <h1>Checkout</h1>
-      <Link to="/cart">Back to Cart</Link>
-    </div>
+    <ScaffoldPage
+      title="Checkout"
+      description="Checkout structure is in place and waiting for service wiring from the team."
+      tasks={[
+        'Load cart and profile data in parallel on mount',
+        'Redirect to /cart if cart is empty',
+        'Support saved/new address and payment method flows',
+        'Show subtotal, 13% HST, and grand total',
+        'Handle order placement success and 402 payment denial'
+      ]}
+    />
   );
 }
 

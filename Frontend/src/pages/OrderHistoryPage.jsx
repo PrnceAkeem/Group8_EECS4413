@@ -1,15 +1,17 @@
-import { Link } from 'react-router-dom';
-
-// TODO: Fetch all orders for the logged-in user with orderApi.fetchOrders() on mount.
-// Display a table: Order ID, date placed, status, total, and a "View" link to /orders/:id.
-// Show a message if there are no past orders.
+import ScaffoldPage from '../components/ScaffoldPage';
 
 function OrderHistoryPage() {
   return (
-    <div>
-      <h1>Order History</h1>
-      <Link to="/catalog">Back to Store</Link>
-    </div>
+    <ScaffoldPage
+      title="Order History"
+      description="Order history route is scaffolded and protected."
+      tasks={[
+        'Fetch orders from orderApi.fetchOrders()',
+        'Render order table with ID, date, status, and total',
+        'Link each row to /orders/:id',
+        'Show empty-state message when no orders exist'
+      ]}
+    />
   );
 }
 

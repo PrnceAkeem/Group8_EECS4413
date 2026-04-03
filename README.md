@@ -1,38 +1,28 @@
 # EECS 4413 — Group 8 Project (Winter 2025–2026)
 
-**6ixOutside** — Sneakers & Streetwear E-Store
+**6ixOutside** — Sneakers E-Store
 
 ---
 
 ## What Is This?
 
-This is our group project for EECS 4413: Building E-Commerce Systems at York University. We built a sneaker and streetwear store called **6ixOutside** that lets users browse, filter, and view shoes from Nike, Jordan, Adidas, Converse, and New Balance.
+This is our group project for EECS 4413: Building E-Commerce Systems at York University. We built a sneaker store called **6ixOutside** that lets users browse, filter, and view shoes from Nike, Jordan, Adidas, Converse, and New Balance.
 
 The course taught us how to build e-commerce systems using a **three-tier architecture** (covered from Lab 3 onward):
 
 - **Presentation tier** — what the user sees (React frontend, same role as JSP views in the labs)
 - **Logic tier** — business rules and request handling (Node.js + Express, same role as Servlets in the labs)
-- **Data tier** — persistent storage (PostgreSQL, same role as MySQL/SQLite in Lab 6)
+- **Data tier** — persistent storage (PostgreSQL, same role as MySQL/SQLite in Lab 6 and etc)
 
-We chose a JavaScript/React stack instead of Java Servlets/JSP because the course spec allows any implementation language, but all the architectural patterns we apply come directly from the labs.
-
----
-
-## Tech Stack
-
-| Layer       | What We Used                       | Course Equivalent (from labs)                       |
-|-------------|------------------------------------|-----------------------------------------------------|
-| Frontend    | React 18, React Router v7, Axios   | HTML/CSS/JS (Lab 1), JSP views (Lab 5)              |
-| Backend     | Node.js, Express 4                 | Java Servlets (Lab 3, 4, 5)                         |
-| Database    | PostgreSQL 16 (`pg` library)       | MySQL / SQLite + JDBC (Lab 6)                       |
-| Auth        | `express-session` + cookies        | HttpSession / Cookie tracking (Lab 4)               |
-| Deployment  | Docker Compose                     | Course spec requirement — runnable on any machine   |
+We chose a JavaScript/React stack instead of Java Servlets/JSP because the course spec allows any implementation language, and the freedom
+to explore more.
 
 ---
+
 
 ## How To Run It
 
-### Step 1 — Start the backend and database (Docker)
+### Step 1 — Start full stack with Docker (recommended)
 
 Make sure Docker Desktop is open, then from the project root:
 
@@ -40,16 +30,17 @@ Make sure Docker Desktop is open, then from the project root:
 docker compose up --build
 ```
 
-This starts two containers:
+This starts three containers:
 
 | Container  | What it does                                                      | Port |
 |------------|-------------------------------------------------------------------|------|
 | `db`       | PostgreSQL — runs `01_schema.sql` then `02_seed.sql` on startup   | 5432 |
 | `backend`  | Node/Express REST API                                             | 5050 |
+| `frontend` | React build served by Nginx (proxies `/api/*` to backend)         | 3000 |
 
 The first time you run it, Docker automatically creates all tables and inserts the demo products and accounts — no manual SQL needed.
 
-### Step 2 — Start the React frontend
+### Step 2 — Optional local frontend dev mode (hot reload)
 
 ```bash
 cd Frontend
@@ -57,7 +48,7 @@ npm install
 npm start
 ```
 
-Frontend opens at `http://localhost:3000`. It proxies all `/api/*` requests to the backend at port 5050 using the `"proxy"` field in `Frontend/package.json` — so we never hardcode the backend URL inside any component.
+Use this mode only if you want local React hot-reload. In Docker mode, frontend is already available at `http://localhost:3000`.
 
 ---
 
@@ -75,38 +66,74 @@ Frontend opens at `http://localhost:3000`. It proxies all `/api/*` requests to t
 ```
 Group8_EECS4413/
 ├── Backend/
-│   ├── server.js               # Entry point — sets up Express, mounts routes
+│   ├── server.js               # Entry point — sets up Express, sessions, and route mounts
+│   ├── db.js                   # Shared PostgreSQL pool (singleton-style shared access point)
 │   ├── controllers/            # MVC Controllers (Lab 5 concept — same job as Servlets)
-│   │   ├── authController.js   # register, login
-│   │   └── catalogController.js# listProducts, getProduct, listBrands, listCategories
+│   │   ├── authController.js
+│   │   ├── catalogController.js
+│   │   ├── cartController.js
+│   │   ├── orderController.js
+│   │   ├── profileController.js
+│   │   └── adminController.js
 │   ├── dao/                    # Data Access Objects (Lab 6 pattern — isolates all SQL)
 │   │   ├── CustomerDAO.js
-│   │   └── ProductDAO.js
+│   │   ├── ProductDAO.js
+│   │   ├── CartDAO.js
+│   │   ├── OrderDAO.js
+│   │   ├── ProfileDAO.js
+│   │   └── AdminDAO.js
+│   ├── middleware/
+│   │   ├── requireAuth.js
+│   │   └── requireAdmin.js
+│   ├── services/
+│   │   └── PaymentService.js
 │   ├── routes/                 # Express routers — map URLs to controller functions
-│   │   ├── authRoutes.js       # /api/auth/*
-│   │   └── catalogRoutes.js    # /api/catalog/*
+│   │   ├── authRoutes.js
+│   │   ├── catalogRoutes.js
+│   │   ├── cartRoutes.js
+│   │   ├── orderRoutes.js
+│   │   ├── profileRoutes.js
+│   │   └── adminRoutes.js
 │   └── db/
 │       └── init/
 │           ├── 01_schema.sql   # Table definitions (brands, products, customers, orders...)
 │           └── 02_seed.sql     # Demo products and accounts
 ├── Frontend/
+│   ├── Dockerfile
+│   ├── nginx.conf
 │   └── src/
 │       ├── App.js              # Root component — defines all client-side routes
 │       ├── context/
 │       │   └── AuthContext.js  # Observer pattern — shared login state across all pages
+│       ├── components/
+│       │   ├── ProtectedRoute.jsx
+│       │   └── ScaffoldPage.jsx
 │       ├── pages/
 │       │   ├── LandingPage.jsx
 │       │   ├── CatalogPage.jsx         # Browse products, filter by brand/category, search
 │       │   ├── ProductDetailPage.jsx   # Single product view with inventory status
 │       │   ├── LoginPage.jsx
-│       │   └── RegisterPage.jsx
+│       │   ├── RegisterPage.jsx
+│       │   ├── CartPage.jsx            # Phase 3 scaffold
+│       │   ├── CheckoutPage.jsx        # Phase 3 scaffold
+│       │   ├── OrderHistoryPage.jsx    # Phase 3 scaffold
+│       │   ├── OrderDetailPage.jsx     # Phase 3 scaffold
+│       │   ├── OrderConfirmationPage.jsx # Phase 3 scaffold
+│       │   ├── ProfilePage.jsx         # Phase 3 scaffold
+│       │   └── AdminPage.jsx           # Phase 3 scaffold
 │       ├── services/
-│       │   └── catalogApi.js   # Axios wrapper — keeps fetch logic out of page components
+│       │   ├── apiClient.js
+│       │   ├── catalogApi.js
+│       │   ├── cartApi.js      # Phase 3 scaffold
+│       │   ├── orderApi.js     # Phase 3 scaffold
+│       │   ├── profileApi.js   # Phase 3 scaffold
+│       │   └── adminApi.js     # Phase 3 scaffold
 │       └── utils/
 │           └── sortStrategies.js  # Strategy pattern — each sort option as a swappable object
 ├── docs/
 │   ├── catalog-api.md          # API contract (endpoints, params, response shapes, errors)
-│   └── phase2-smoke-test.md    # Manual test checklist
+│   ├── phase2-smoke-test.md    # Manual test checklist
+│   └── class-alignment.md      # Course-to-project mapping (lectures/labs to implementation)
 └── docker-compose.yml
 ```
 
@@ -234,7 +261,7 @@ This is why the navbar on `CatalogPage` and `ProductDetailPage` both immediately
 ### Singleton Pattern (GoF Creational)
 **From GoF design pattern lectures.**
 
-`Backend/db/index.js` creates one `pg.Pool` instance and exports it. Every DAO imports this same pool — they never open their own connections. One instance, one point of control.
+`Backend/db.js` creates one `pg.Pool` instance and exports it. Every DAO imports this same pool — they never open their own connections. One instance, one point of control.
 
 ---
 
@@ -268,15 +295,6 @@ inventory_transactions — tracks stock movements in/out
 
 ---
 
-## Security Notes
-
-Concepts applied from the course:
-
-- **Parameterized queries** — all user input is passed through `$1, $2, ...` parameters in `pg`. Never string-concatenated into SQL. Lab 6 used `PreparedStatement` with `?` placeholders for the same reason.
-- **SORT_MAP whitelist** — `ORDER BY` cannot be parameterized in SQL, so the sort key is validated against a hardcoded object before it touches any query string.
-- **Server-side sessions** — `express-session` stores session data on the server. The browser only holds a session ID cookie, same as `HttpSession` in Lab 4.
-
----
 
 ## Environment Variables
 
@@ -284,21 +302,13 @@ Copy `.env.example` to `.env` to override Docker defaults:
 
 | Variable                | Default       | Notes                               |
 |-------------------------|---------------|-------------------------------------|
-| `POSTGRES_DB`           | `sixoutside`  |                                     |
-| `POSTGRES_USER`         | `admin`       |                                     |
-| `POSTGRES_PASSWORD`     | `password`    | Change in production                |
+| `POSTGRES_DB`           | `sixoutsidedb`|                                     |
+| `POSTGRES_USER`         | `sixoutside`  |                                     |
+| `POSTGRES_PASSWORD`     | `sixpassword` | Change in production                |
 | `POSTGRES_PORT`         | `5432`        |                                     |
 | `BACKEND_PORT`          | `5050`        |                                     |
+| `FRONTEND_PORT`         | `3000`        | Nginx-served React app in Docker    |
 | `SESSION_SECRET`        | *(required)*  | Any random string works locally     |
 | `SESSION_COOKIE_SECURE` | `false`       | Set `true` if deployed on HTTPS     |
 
 ---
-
-## What's Coming in Phase 3
-
-The schema already has `shopping_cart_items`, `purchase_orders`, and `order_items` tables ready to go. Phase 3 will add:
-
-- **Shopping cart** — add/remove items, update quantities (builds on session tracking from Lab 4)
-- **Checkout flow** — create an order from the cart
-- **Order history** — logged-in users can view past orders
-- **Admin inventory management** — update stock levels, manage products

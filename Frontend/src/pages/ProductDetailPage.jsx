@@ -1,26 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchProductById } from '../services/catalogApi';
-// TODO (item 23): import addToCart from cartApi and useAuth from AuthContext
-// import { addToCart } from '../services/cartApi';
-// import { useAuth } from '../context/AuthContext';
-
-// ProductDetailPage — shows a single product fetched by its ID from the URL
-// URL shape: /catalog/:id   e.g. /catalog/SNK-NIKE-AF1
-//
-// useParams() pulls the :id segment out of the URL so we know what to fetch.
-// This is the same idea as request path params in Express (req.params.id).
+import { useAuth } from '../context/AuthContext';
 
 function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  // TODO (item 23): const { user, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [error, setError]     = useState(null);
-  // TODO (item 23): add cartMessage and addingToCart state
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -45,18 +38,71 @@ function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // TODO (item 23): implement handleAddToCart
-  // - If user not logged in, navigate to /login with state { from: /catalog/:id }
-  // - Call addToCart(product.productId, 1) and show success/error message
+  useEffect(() => {
+    if (!isUserMenuOpen) return undefined;
+
+    function handleOutsideClick(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [isUserMenuOpen]);
 
   return (
     <div className="store-page">
       <header className="store-header">
-        <div className="store-logo">6ixOutside</div>
+        <Link to="/catalog" className="store-logo">6ixOutside</Link>
+        <div aria-hidden="true" />
 
         <div className="store-actions">
-          <Link to="/catalog" className="header-link">Back to Catalog</Link>
-          {/* TODO (item 23): show user name + Sign Out if logged in, Sign In / Sign Up if guest */}
+          {user ? (
+            <div className="user-menu" ref={userMenuRef}>
+              <button
+                type="button"
+                className="header-link user-menu-trigger"
+                onClick={() => setIsUserMenuOpen((open) => !open)}
+              >
+                {user.firstName}
+              </button>
+
+              {isUserMenuOpen && (
+                <div className="user-menu-dropdown">
+                  <Link to="/cart" className="user-menu-item" onClick={() => setIsUserMenuOpen(false)}>
+                    Cart
+                  </Link>
+                  <Link to="/orders" className="user-menu-item" onClick={() => setIsUserMenuOpen(false)}>
+                    Orders
+                  </Link>
+                  <Link to="/profile" className="user-menu-item" onClick={() => setIsUserMenuOpen(false)}>
+                    Profile
+                  </Link>
+                  {user.isAdmin && (
+                    <Link to="/admin" className="user-menu-item" onClick={() => setIsUserMenuOpen(false)}>
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    className="user-menu-item danger"
+                    onClick={async () => {
+                      setIsUserMenuOpen(false);
+                      await logout();
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="header-link">Sign In</Link>
+              <Link to="/register" className="header-link filled">Sign Up</Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -129,7 +175,14 @@ function ProductDetailPage() {
                   : 'Out of Stock'}
               </p>
 
-              {/* TODO (item 23): Add to Cart button — calls handleAddToCart, disabled when out of stock */}
+              <button
+                className="product-btn"
+                type="button"
+                disabled
+                style={{ width: '100%', opacity: 0.7, cursor: 'not-allowed' }}
+              >
+                Add to Cart (Phase 3 In Progress)
+              </button>
 
               <button
                 className="product-btn"

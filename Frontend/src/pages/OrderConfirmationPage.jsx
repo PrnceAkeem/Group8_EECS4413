@@ -1,19 +1,19 @@
-import { Link, useParams } from 'react-router-dom';
-
-// TODO: Read :id from URL params (useParams).
-// Fetch order details with orderApi.fetchOrder(id).
-// Display order number, list of items (product name, qty, line total), and grand total.
-// Provide a "View Order Details" link to /orders/:id and a "Continue Shopping" link to /catalog.
+import { useParams } from 'react-router-dom';
+import ScaffoldPage from '../components/ScaffoldPage';
 
 function OrderConfirmationPage() {
   const { id } = useParams();
 
   return (
-    <div>
-      <h1>Order Confirmation</h1>
-      <p>Order #{id}</p>
-      <Link to="/catalog">Continue Shopping</Link>
-    </div>
+    <ScaffoldPage
+      title={`Order Confirmation #${id}`}
+      description="Order confirmation route is wired. Team can now implement the final UI/details."
+      tasks={[
+        'Fetch order details using orderApi.fetchOrder(id)',
+        'Display order items and totals',
+        'Link to /orders/:id for full detail view'
+      ]}
+    />
   );
 }
 

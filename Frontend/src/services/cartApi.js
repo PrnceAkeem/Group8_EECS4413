@@ -1,17 +1,19 @@
-import apiClient from './apiClient';
+function notImplemented(name) {
+  throw new Error(`Phase 3 TODO: ${name} is not implemented yet.`);
+}
 
 export async function fetchCart() {
-  // TODO: GET /api/cart
+  return notImplemented('fetchCart');
 }
 
 export async function addToCart(productId, quantity) {
-  // TODO: POST /api/cart  { productId, quantity }
+  return notImplemented(`addToCart(${productId}, ${quantity})`);
 }
 
 export async function updateCartItem(productId, quantity) {
-  // TODO: PATCH /api/cart/:productId  { quantity }
+  return notImplemented(`updateCartItem(${productId}, ${quantity})`);
 }
 
 export async function removeFromCart(productId) {
-  // TODO: DELETE /api/cart/:productId
+  return notImplemented(`removeFromCart(${productId})`);
 }

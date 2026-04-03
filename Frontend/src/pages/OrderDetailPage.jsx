@@ -1,19 +1,20 @@
-import { Link, useParams } from 'react-router-dom';
-
-// TODO: Read :id from URL params (useParams).
-// Fetch order with orderApi.fetchOrder(id).
-// Show order status, payment status, date placed.
-// Show a table of line items: product name, quantity, unit price, line total.
-// Show subtotal, tax, and grand total.
+import { useParams } from 'react-router-dom';
+import ScaffoldPage from '../components/ScaffoldPage';
 
 function OrderDetailPage() {
   const { id } = useParams();
 
   return (
-    <div>
-      <h1>Order #{id}</h1>
-      <Link to="/orders">Back to Order History</Link>
-    </div>
+    <ScaffoldPage
+      title={`Order #${id}`}
+      description="Order detail structure is ready for implementation."
+      tasks={[
+        'Fetch a single order with orderApi.fetchOrder(id)',
+        'Show status, payment status, and placed date',
+        'Render line items with unit and line totals',
+        'Display subtotal, tax, and total'
+      ]}
+    />
   );
 }
 

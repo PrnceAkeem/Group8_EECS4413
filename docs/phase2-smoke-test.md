@@ -4,9 +4,9 @@ Run these checks after starting the stack with `docker compose up --build` and o
 
 ---
 
-## 1. Catalog loads
+## 1. Catalog loads (public)
 
-- [ ] Navigate to `/catalog`
+- [ ] Navigate to `/` or `/catalog`
 - [ ] Product grid renders (should show ~25 products)
 - [ ] Each card shows brand, name, category, and price formatted as `$X.XX`
 
@@ -31,11 +31,11 @@ Run these checks after starting the stack with `docker compose up --build` and o
 
 ---
 
-## 4. Category filter
+## 4. Audience tabs (category-style filter)
 
-- [ ] Select **Basketball** from the Category dropdown
-- [ ] Only Basketball products appear
-- [ ] Combine with a brand filter — results are narrowed further
+- [ ] Click top tabs: **New Arrivals**, **Men**, **Women**, **Kids**
+- [ ] Product list updates per selected tab
+- [ ] Selection is preserved in URL query param `?audience=...`
 
 ---
 
@@ -51,8 +51,8 @@ Run these checks after starting the stack with `docker compose up --build` and o
 
 - [ ] Apply any filter or sort
 - [ ] A **Clear Filters** button appears at the bottom of the sidebar
-- [ ] Click it — all filters are removed and the full catalog loads
-- [ ] URL has no query params after clearing
+- [ ] Click it — color/size/price/brand selections clear and full list returns for default tab
+- [ ] URL resets to default audience (`?audience=new-arrivals`)
 
 ---
 
@@ -92,7 +92,7 @@ Run these checks after starting the stack with `docker compose up --build` and o
 
 ## 11. Docker compose
 
-- [ ] `docker compose up --build` starts both `db` and `backend` without errors
+- [ ] `docker compose up --build` starts `db`, `backend`, and `frontend` without errors
 - [ ] `GET http://localhost:5050/health` returns `{ status: "ok" }`
 - [ ] `GET http://localhost:5050/api/catalog` returns a JSON array of products
 - [ ] `GET http://localhost:5050/api/catalog/SNK-NIKE-DUNK` returns a single product object
