@@ -10,6 +10,8 @@ const orderRoutes = require('./routes/orderRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
+const path = require('path');
+
 const app = express();
 const PORT = Number.parseInt(process.env.PORT || '5050', 10);
 const sessionMaxAgeMs = Number.parseInt(
@@ -35,12 +37,7 @@ app.use(
   })
 );
 
-app.get('/', (req, res) => {
-  res.json({
-    service: '6ixOutside Backend',
-    status: 'ok'
-  });
-});
+app.use(express.static(path.join(__dirname, '..', 'Frontend')));
 
 app.get('/health', async (req, res) => {
   try {

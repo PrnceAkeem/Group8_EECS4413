@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6ixOutside — Shop</title>
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/catalog.css" />
+</head>
+<body class="page">
+
+  <nav class="nav">
+    <a class="nav-logo" href="/catalog.html">6ixOutside</a>
+    <div class="nav-search">
+      <input id="search-input" type="text" placeholder="Search shoes..." />
+    </div>
+    <div class="nav-actions" id="nav-actions"></div>
+  </nav>
+
+  <div class="top-banner">
+    <div class="top-banner-content">
+      <p class="banner-label">Streetwear Footwear</p>
+      <p class="banner-copy">Shop trending sneakers, everyday essentials, and the newest drops in one place.</p>
+    </div>
+  </div>
+
+  <div class="catalog-body">
+
+    <section class="products-section">
+      <div class="products-topbar">
+        <h2 id="results-heading">All Shoes</h2>
+        <select class="sort-select" id="sort-select">
+          <option value="">Sort: Default</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+          <option value="name_asc">Name: A–Z</option>
+          <option value="name_desc">Name: Z–A</option>
+        </select>
+      </div>
+      <div class="products-grid" id="products-grid"></div>
+    </section>
+
+    <aside class="filters-panel">
+      <h3>Filter by Brand</h3>
+      <div class="filter-group">
+        <div id="brand-filters"></div>
+      </div>
+      <button class="filter-clear" id="clear-btn">Clear</button>
+    </aside>
+
+  </div>
+
+  <script>
+    let selectedBrands = [];
+
+    async function loadNav() {
+      const res = await fetch('/api/auth/me').catch(() => null);
+      const el = document.getElementById('nav-actions');
+      if (res && res.ok) {
+        const data = await res.json();
+        el.innerHTML = `
+          <span style="color:#fff;font-weight:700">Hi, ${data.user.firstName}</span>
+          <a class="nav-link" href="/cart.html">Cart</a>
+          <a class="nav-link" href="/profile.html">Profile</a>
+          <button class="nav-link" onclick="logout()">Sign Out</button>
+        `;
+      } else {
+        el.innerHTML = `
+          <a class="nav-link" href="/login.html">Sign In</a>
+          <a class="nav-link filled" href="/register.html">Register</a>
+        `;
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.reload();
+    }
+
+    async function loadFilters() {
+      const res = await fetch('/api/catalog/brands');
+      const { brands } = await res.json();
+      document.getElementById('brand-filters').innerHTML = brands.map(b => `
+        <label>
+          <input type="checkbox" value="${b}" onchange="toggleBrand('${b}')"> ${b}
+        </label>
+      `).join('');
+    }
+
+    function toggleBrand(value) {
+      selectedBrands = selectedBrands.includes(value)
+        ? selectedBrands.filter(b => b !== value)
+        : [...selectedBrands, value];
+      loadProducts();
+    }
+
+    async function loadProducts() {
+      const sort = document.getElementById('sort-select').value;
+      const q = document.getElementById('search-input').value.trim();
+
+      const params = new URLSearchParams();
+      if (sort) params.set('sort', sort);
+      if (q) params.set('q', q);
+      if (selectedBrands.length === 1) params.set('brand', selectedBrands[0]);
+
+      const res = await fetch(`/api/catalog?${params}`);
+      const { products } = await res.json();
+
+      let filtered = products;
+      if (selectedBrands.length > 1) {
+        filtered = filtered.filter(p => selectedBrands.includes(p.brand));
+      }
+
+      const heading = document.getElementById('results-heading');
+      heading.textContent = filtered.length === products.length
+        ? 'All Shoes'
+        : `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
+
+      const grid = document.getElementById('products-grid');
+      if (filtered.length === 0) {
+        grid.innerHTML = '<p class="no-results">No shoes found. Try adjusting your filters.</p>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const price = '$' + (p.priceCents / 100).toFixed(2);
+        const img = `/assets/${p.productId}.jpg`;
+        return `
+          <div class="product-card" onclick="location.href='/product.html?id=${p.productId}'">
+            <img src="${img}" alt="${p.name}" onerror="this.src='${p.imageUrl}'" />
+            <div class="card-body">
+              <p class="card-brand">${p.brand}</p>
+              <p class="card-name">${p.name}</p>
+              <p class="card-category">${p.category}</p>
+              <p class="card-price">${price}</p>
+              <button class="card-btn">View Details</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('sort-select').addEventListener('change', loadProducts);
+
+    let searchTimer;
+    document.getElementById('search-input').addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(loadProducts, 300);
+    });
+
+    document.getElementById('clear-btn').addEventListener('click', () => {
+      selectedBrands = [];
+      document.querySelectorAll('#brand-filters input[type="checkbox"]').forEach(cb => cb.checked = false);
+      loadProducts();
+    });
+
+    loadNav();
+    loadFilters();
+    loadProducts();
+  </script>
+
+</body>
+</html>

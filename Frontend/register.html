@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6ixOutside — Register</title>
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+
+  <div class="auth-page">
+
+    <div class="auth-left">
+      <a class="auth-left-logo" href="/catalog.html">6ixOutside</a>
+      <h1>Join the community.</h1>
+      <p>Create an account to start shopping, save your cart, and track your orders.</p>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-card">
+        <h2>Create Account</h2>
+        <p class="auth-subtext">Already have an account? <a href="/login.html">Sign in</a></p>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="John" />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="Doe" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@email.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" />
+        </div>
+
+        <button class="auth-btn" onclick="register()">Create Account</button>
+
+        <p class="msg" id="msg"></p>
+
+        <p class="auth-switch">Already have an account? <a href="/login.html">Sign in</a></p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    async function register() {
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName  = document.getElementById('lastName').value.trim();
+      const dob       = document.getElementById('dob').value;
+      const email     = document.getElementById('email').value.trim();
+      const password  = document.getElementById('password').value;
+      const msg       = document.getElementById('msg');
+
+      if (!firstName || !lastName || !dob || !email || !password) {
+        msg.className = 'msg error';
+        msg.textContent = 'All fields are required.';
+        return;
+      }
+
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, dob, email, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        msg.className = 'msg success';
+        msg.textContent = 'Account created! Redirecting to sign in...';
+        setTimeout(() => { window.location.href = '/login.html'; }, 1200);
+      } else {
+        msg.className = 'msg error';
+        msg.textContent = data.message || 'Registration failed.';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') register();
+    });
+  </script>
+
+</body>
+</html>

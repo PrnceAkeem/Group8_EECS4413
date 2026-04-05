@@ -33,17 +33,11 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-sixpassword}
       SESSION_SECRET: ${SESSION_SECRET:-change-me-before-production}
       SESSION_COOKIE_SECURE: "false"
+    volumes:
+      - ./Frontend:/Frontend:ro
     ports:
       - "${BACKEND_PORT:-5050}:5050"
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./Frontend
-    depends_on:
-      - backend
-    ports:
-      - "${FRONTEND_PORT:-3000}:80"
+      - "3000:5050"
     restart: unless-stopped
 
 volumes:

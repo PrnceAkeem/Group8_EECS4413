@@ -118,8 +118,16 @@ async function logout(req, res) {
   }
 }
 
+function me(req, res) {
+  if (req.session && req.session.user) {
+    return res.status(200).json({ user: req.session.user });
+  }
+  return res.status(401).json({ user: null });
+}
+
 module.exports = {
   register,
   login,
-  logout
+  logout,
+  me
 };

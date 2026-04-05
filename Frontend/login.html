@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6ixOutside — Sign In</title>
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+
+  <div class="auth-page">
+
+    <div class="auth-left">
+      <a class="auth-left-logo" href="/catalog.html">6ixOutside</a>
+      <h1>Welcome back.</h1>
+      <p>Sign in to your account to view your cart, track orders, and manage your profile.</p>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-card">
+        <h2>Sign In</h2>
+        <p class="auth-subtext">Don't have an account? <a href="/register.html">Register</a></p>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@email.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" />
+        </div>
+
+        <button class="auth-btn" onclick="login()">Sign In</button>
+
+        <p class="msg" id="msg"></p>
+
+        <p class="auth-switch">Don't have an account? <a href="/register.html">Create one</a></p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get('next') || '/catalog.html';
+
+    async function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+
+      if (!email || !password) {
+        msg.className = 'msg error';
+        msg.textContent = 'Please enter your email and password.';
+        return;
+      }
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        if (data.user.isAdmin) {
+          window.location.href = '/admin.html';
+        } else {
+          window.location.href = next;
+        }
+      } else {
+        msg.className = 'msg error';
+        msg.textContent = data.message || 'Login failed.';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login();
+    });
+  </script>
+
+</body>
+</html>
