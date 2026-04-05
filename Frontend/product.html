@@ -62,7 +62,7 @@
 
       const { product: p } = await res.json();
       const price = '$' + (p.priceCents / 100).toFixed(2);
-      const img = `/assets/${p.productId}.jpg`;
+      const img = p.imageUrl || '';
       document.title = `6ixOutside — ${p.name}`;
 
       let stockLabel = '';
@@ -79,7 +79,7 @@
       document.getElementById('product-content').innerHTML = `
         <div class="product-layout">
           <div class="product-image-wrap">
-            <img src="${img}" alt="${p.name}" onerror="this.src='${p.imageUrl}'" />
+            <img src="${img}" alt="${p.name}" />
           </div>
           <div class="product-info">
             <p class="product-brand">${p.brand}</p>

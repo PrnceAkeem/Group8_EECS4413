@@ -124,10 +124,10 @@
 
       grid.innerHTML = filtered.map(p => {
         const price = '$' + (p.priceCents / 100).toFixed(2);
-        const img = `/assets/${p.productId}.jpg`;
+        const img = p.imageUrl || '';
         return `
           <div class="product-card" onclick="location.href='/product.html?id=${p.productId}'">
-            <img src="${img}" alt="${p.name}" onerror="this.src='${p.imageUrl}'" />
+            <img src="${img}" alt="${p.name}" />
             <div class="card-body">
               <p class="card-brand">${p.brand}</p>
               <p class="card-name">${p.name}</p>
