@@ -78,8 +78,7 @@ VALUES
     40,
     2024,
     'US 6-14',
-    -- 'https://placehold.co/600x400?text=Air+Force+1'
-    'https://image-cdn.hypb.st/https%3A%2F%2Fhypebeast.com%2Fimage%2F2022%2F06%2Fnike-air-force-1-low-snkrs-day-dx2666-100-release-info-001.jpg?q=75&w=800&cbr=1&fit=max'
+    '/assets/Nike_Air_Force_1.png'
   ),
   (
     'SNK-NIKE-DUNK',
@@ -93,8 +92,7 @@ VALUES
     28,
     2024,
     'US 6-13',
-    -- 'https://placehold.co/600x400?text=Dunk+Low'
-    'https://images.stockx.com/360/Nike-SB-Dunk-Low-Pro-Why-So-Sad/Images/Nike-SB-Dunk-Low-Pro-Why-So-Sad/Lv2/img01.jpg?w=480&q=60&dpr=1&updated_at=1667895818&h=320'
+    '/assets/Nike_Dunk_Low.png'
   ),
   (
     'SNK-NIKE-AM90',
@@ -108,8 +106,7 @@ VALUES
     20,
     2023,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=Air+Max+90'
-    'https://i.ebayimg.com/images/g/B3wAAOSw16hlFn-B/s-l400.jpg'
+    '/assets/Nike_Air_Max_90.png'
   ),
   (
     'SNK-NIKE-AM95',
@@ -123,8 +120,7 @@ VALUES
     15,
     2024,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=Air+Max+95'
-    'https://static.nike.com/a/images/t_web_pw_592_v2/f_auto/u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/b8ff2462-46de-4db6-a295-245d956196ca/NIKE+AIR+MAX+95+BIG+BUBBLE.png'
+    '/assets/Nike_Air_Max_95.png'
   ),
   (
     'SNK-NIKE-V5',
@@ -138,8 +134,7 @@ VALUES
     24,
     2023,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=Vomero+5'
-    'https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/2a5edc77-8dec-40c3-a7b7-13f5e1a1d00c/NIKE+V5+RNR.png'
+    '/assets/Nike_Zoom_Vomero_5.png'
   ),
   -- Jordan (5)
   (
@@ -154,8 +149,7 @@ VALUES
     18,
     2024,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=Air+Jordan+1'
-    'https://static.nike.com/a/images/w_1280,q_auto,f_auto/882c8d1f-2ff0-41ca-9d33-04438ab90473/air-jordan-1-low-og-chicago-hq6998-600-release-date.jpg'
+    '/assets/Jordan_Retro_High_OG.png'
   ),
   (
     'SNK-JOR-AJ3',
@@ -169,8 +163,7 @@ VALUES
     12,
     2024,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=Air+Jordan+3'
-    'https://snkrzgarden.com/cdn/shop/files/imagen_2025-03-14_124743783.png?v=1741952868&width=533'
+    '/assets/Jordan_Retro_3.png'
   ),
   (
     'SNK-JOR-RET7',
@@ -184,8 +177,7 @@ VALUES
     10,
     2023,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=Jordan+Retro+7'
-    'https://m.media-amazon.com/images/I/61a-mhjiprL._AC_UY900_.jpg'
+    '/assets/Jordan_Retro_7.png'
   ),
   (
     'SNK-JOR-AJ11',
@@ -199,23 +191,21 @@ VALUES
     8,
     2023,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=Air+Jordan+11'
-    'https://ca.kith.com/cdn/shop/files/JBCT8012-104.jpg?v=1741870921&width=1920'
+    '/assets/Jordan_Retro_11.png'
   ),
   (
     'SNK-JOR-AJ12',
     (SELECT category_id FROM categories WHERE name = 'Basketball'),
     (SELECT brand_id FROM brands WHERE name = 'Jordan'),
-    'AJ12 Retro',
-    'Air Jordan 12',
-    'Quilted leather upper inspired by the Japanese rising sun flag. Zoom Air cushioning throughout.',
-    'Taxi (Black / Yellow)',
+    'Jordan Retro 10',
+    'Air Jordan 10',
+    'Classic mid-top silhouette with perforated leather upper and Air sole unit.',
+    'Steel (Black / Steel Grey)',
     21000,
     9,
     2024,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=Air+Jordan+12'
-    'https://jdsports.ca/cdn/shop/files/CT8013-117_air_jordan_12_retro_white__black___taxi_4.jpg?v=1762338775&width=1200'
+    '/assets/Jordan_Retro_10.png'
   ),
   -- Adidas (5)
   (
@@ -230,8 +220,7 @@ VALUES
     35,
     2024,
     'US 6-12',
-    -- 'https://placehold.co/600x400?text=Samba+OG'
-    'https://static.ilmalteselab.com/Adidas-Samba-Triple-Rose-Snk-_43A8448.webp'
+    '/assets/Adidas_Samba_OG.png'
   ),
   (
     'SNK-ADI-GAZ',
@@ -245,8 +234,7 @@ VALUES
     22,
     2024,
     'US 6-12',
-    -- 'https://placehold.co/600x400?text=Gazelle'
-    'https://assets.adidas.com/images/c_fill,g_auto,w_1200,h_630,f_auto,q_auto/w_600,f_auto,q_auto/30796291304b4797bf57650571a6600a_9366/GAZELLE_ADV_Shoes_Brown_HQ7547_01_00_standard.jpg'
+    '/assets/Adidas_Gazelle.png'
   ),
   (
     'SNK-ADI-CAMP',
@@ -260,8 +248,7 @@ VALUES
     30,
     2024,
     'US 6-12',
-    -- 'https://placehold.co/600x400?text=Campus+00s'
-    'https://assets.adidas.com/images/c_fill,g_auto,w_1200,h_630,f_auto,q_auto/w_600,f_auto,q_auto/4659ee058ba34bd2a5d0af500104c17d_9366/Campus_00s_Shoes_Black_HQ8708_01_standard.jpg'
+    '/assets/Adidas_Campus.png'
   ),
   (
     'SNK-ADI-SPEZ',
@@ -275,23 +262,21 @@ VALUES
     18,
     2024,
     'US 6-12',
-    -- 'https://placehold.co/600x400?text=Handball+Spezial'
-    'https://www.svpsports.ca/cdn/shop/files/adidas---Unisex-Handball-Spezial-Shoes-_JS3867_-01.jpg?v=1771361014&width=2400'
+    '/assets/Adidas_Handball_Spezial.png'
   ),
   (
     'SNK-ADI-YZY',
     (SELECT category_id FROM categories WHERE name = 'Lifestyle'),
     (SELECT brand_id FROM brands WHERE name = 'Adidas'),
-    'Yeezy Slide',
-    'Yeezy Slide',
-    'One-piece EVA foam slide with textured footbed. Minimal and comfortable.',
-    'Bone',
+    'Yeezy Foam RNR',
+    'Yeezy Foam RNR',
+    'Sculpted foam clog with anatomical footbed and perforated upper. Futuristic and lightweight.',
+    'Onyx',
     7000,
     50,
     2023,
     'US 5-14',
-    -- 'https://placehold.co/600x400?text=Yeezy+Slide'
-    'https://www.8pmshop.ca/cdn/shop/products/img01_a02d4b10-bab5-408c-8a92-153bf7f6e659.jpg?v=1589005596&width=1000'
+    '/assets/Adidas_YeezyFoam_RNR.png'
   ),
   -- Converse (5)
   (
@@ -306,8 +291,7 @@ VALUES
     60,
     2024,
     'US 4-13',
-    -- 'https://placehold.co/600x400?text=Chuck+Taylor'
-    'https://boathousestores.com/cdn/shop/files/CON-560845C-BLK-1.jpg?v=1773840598&width=1000'
+    '/assets/Converse_Chuck_Taylor_All_Star.png'
   ),
   (
     'SNK-CON-C70',
@@ -321,8 +305,7 @@ VALUES
     40,
     2024,
     'US 4-13',
-    -- 'https://placehold.co/600x400?text=Chuck+70'
-    'https://converse.ca/cdn/shop/files/162050C_162050C_A_107X1_694044a4-56b0-4d45-b19b-c92b45fb2fc1.jpg?v=1754070916&width=2048'
+    '/assets/Converse_Chuck_70.png'
   ),
   (
     'SNK-CON-ONEST',
@@ -336,8 +319,7 @@ VALUES
     25,
     2023,
     'US 4-13',
-    -- 'https://placehold.co/600x400?text=One+Star'
-    'https://scene7.zumiez.com/is/image/zumiez/product_main_medium/Converse-One-Star-Pro-Black-%26-White-Suede-Skate-Shoes-_344519-front-US.jpg'
+    '/assets/Converse_One_Star.png'
   ),
   (
     'SNK-CON-RSH',
@@ -351,8 +333,7 @@ VALUES
     20,
     2023,
     'US 4-13',
-    -- 'https://placehold.co/600x400?text=Run+Star+Hike'
-    'https://cdn.shoplightspeed.com/shops/613683/files/57227044/1600x2048x2/run-star-hike-hi-leather-black-white-gum-cc060b-a0.jpg'
+    '/assets/Converse_Run_Star_Hike.png'
   ),
   (
     'SNK-CON-SHAI',
@@ -366,8 +347,7 @@ VALUES
     16,
     2024,
     'US 6-14',
-    -- 'https://placehold.co/600x400?text=Shai+001'
-    'https://converse.ca/cdn/shop/files/A18977C_A_08X1_db5fce0c-2955-4930-a941-db0fe9457aae.png?v=1758037504&width=574'
+    '/assets/Converse_SHAI_001.png'
   ),
   -- New Balance (5)
   (
@@ -382,8 +362,7 @@ VALUES
     30,
     2024,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=NB+550'
-    'https://nb.scene7.com/is/image/NB/bb550ha1_nb_02_i?$pdpflexf2$&wid=440&hei=440'
+    '/assets/NB_550.png'
   ),
   (
     'SNK-NB-2002R',
@@ -397,8 +376,7 @@ VALUES
     18,
     2023,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=NB+2002R'
-    'https://media-www.sportchek.ca/product/div-05-footwear/dpt-80-footwear/sdpt-01-mens/334152349/new-balance-2002r-grey-white-823-m-5e774340-3668-4226-b11e-04fdcf7a22c2-jpgrendition.jpg'
+    '/assets/NB_2002R.png'
   ),
   (
     'SNK-NB-1906R',
@@ -412,8 +390,7 @@ VALUES
     15,
     2023,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=NB+1906R'
-    'https://www.mytheresa.com/image/1094/1238/100/88/P00919155.jpg'
+    '/assets/NB_1906.png'
   ),
   (
     'SNK-NB-9060',
@@ -427,8 +404,7 @@ VALUES
     14,
     2024,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=NB+9060'
-    'https://nb.scene7.com/is/image/NB/u9060493_nb_02_i?$pdpflexf2$&wid=440&hei=440'
+    '/assets/NB_9060.png'
   ),
   (
     'SNK-NB-530',
@@ -442,8 +418,7 @@ VALUES
     35,
     2024,
     'US 7-13',
-    -- 'https://placehold.co/600x400?text=NB+530'
-    'https://nb.scene7.com/is/image/NB/u530csb_nb_02_i?$pdpflexf2$&wid=440&hei=440'
+    '/assets/NB_530.png'
   )
 ON CONFLICT (product_id) DO UPDATE
 SET
