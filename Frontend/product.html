@@ -36,7 +36,7 @@
           <button class="nav-link" onclick="logout()">Sign Out</button>
         `;
       } else {
-        el.innerHTML = `
+        el.innerHTML = `http://localhost:3000
           <a class="nav-link" href="/login.html">Sign In</a>
           <a class="nav-link filled" href="/register.html">Register</a>
         `;
@@ -118,46 +118,73 @@
     }
 
     async function addToCart(productId, maxQty) {
-      const authRes = await fetch('/api/auth/me');
-      if (!authRes.ok) {
-        window.location.href = `/login.html?next=/product.html?id=${productId}`;
-        return;
-      }
+    const qty = parseInt(document.getElementById('qty').value, 10);
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('add-btn');
 
-      const qty = parseInt(document.getElementById('qty').value, 10);
-      const msg = document.getElementById('msg');
-
-      if (qty < 1 || qty > maxQty) {
-        msg.className = 'msg error';
-        msg.textContent = `Quantity must be between 1 and ${maxQty}.`;
-        return;
-      }
-
-      const btn = document.getElementById('add-btn');
-      btn.disabled = true;
-      btn.textContent = 'Adding...';
-
-      const res = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: qty })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        msg.className = 'msg success';
-        msg.textContent = 'Added to cart!';
-        btn.textContent = 'Add to Cart';
-        btn.disabled = false;
-      } else {
-        msg.className = 'msg error';
-        msg.textContent = data.message || 'Failed to add to cart.';
-        btn.textContent = 'Add to Cart';
-        btn.disabled = false;
-      }
+    if (qty < 1 || qty > maxQty) {
+      msg.className = 'msg error';
+      msg.textContent = `Quantity must be between 1 and ${maxQty}.`;
+      return;
     }
 
+    btn.disabled = true;
+    btn.textContent = 'Adding...';
+
+    try {
+      const authRes = await fetch('/api/auth/me').catch(() => null);
+
+      if (authRes && authRes.ok) {
+        const res = await fetch('/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, quantity: qty })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          msg.className = 'msg success';
+          msg.innerHTML = `
+            Added to cart!
+            <a href="/cart.html" style="margin-left:8px;font-weight:700;text-decoration:underline;">
+              View Cart
+            </a>
+          `;
+        } else {
+          msg.className = 'msg error';
+          msg.textContent = data.message || 'Failed to add to cart.';
+        }
+      } else {
+        const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+        const existingIndex = guestCart.findIndex(item => item.productId === productId);
+
+        if (existingIndex !== -1) {
+          const newQty = guestCart[existingIndex].quantity + qty;
+          guestCart[existingIndex].quantity = Math.min(newQty, maxQty);
+        } else {
+          guestCart.push({ productId, quantity: qty });
+        }
+
+        localStorage.setItem('guestCart', JSON.stringify(guestCart));
+
+        msg.className = 'msg success';
+        msg.innerHTML = `
+          Added to cart!
+          <a href="/cart.html" style="margin-left:8px;font-weight:700;text-decoration:underline;">
+            View Cart
+          </a>
+        `;
+      }
+    } catch (err) {
+      msg.className = 'msg error';
+      msg.textContent = 'Failed to add to cart.';
+    } finally {
+      btn.textContent = 'Add to Cart';
+      btn.disabled = false;
+    }
+  }
+  
     loadNav();
     loadProduct();
   </script>
