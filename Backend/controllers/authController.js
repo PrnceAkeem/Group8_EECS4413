@@ -1,5 +1,7 @@
 const CustomerDAO = require('../dao/CustomerDAO');
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 async function register(req, res) {
   try {
     const { firstName, lastName, dob, email, password } = req.body;
@@ -9,6 +11,13 @@ async function register(req, res) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required.'
+      });
+    }
+
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid email address.'
       });
     }
 

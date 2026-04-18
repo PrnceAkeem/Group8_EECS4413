@@ -124,7 +124,7 @@ async function getProducts({ brand, category, q, sort } = {}) {
   if (q) {
     values.push(`%${q}%`);
     conditions.push(
-      `(p.name ILIKE $${values.length} OR p.description ILIKE $${values.length})`
+      `(p.name ILIKE $${values.length} OR p.description ILIKE $${values.length} OR p.colorway ILIKE $${values.length} OR p.model ILIKE $${values.length} OR b.name ILIKE $${values.length})`
     );
   }
 

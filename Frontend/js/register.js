@@ -12,6 +12,13 @@ async function register() {
     return;
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailRegex.test(email)) {
+    msg.className = 'msg error';
+    msg.textContent = 'Please enter a valid email address.';
+    return;
+  }
+
   const res = await fetch('/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
