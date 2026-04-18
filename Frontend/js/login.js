@@ -23,9 +23,20 @@ async function login() {
   if (res.ok) {
     if (data.user.isAdmin) {
       window.location.href = '/admin.html';
-    } else {
-      window.location.href = next;
+      return;
     }
+
+    const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+    if (guestCart.length > 0) {
+      await fetch('/api/cart/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: guestCart })
+      }).catch(() => null);
+      localStorage.removeItem('guestCart');
+    }
+
+    window.location.href = next;
   } else {
     msg.className = 'msg error';
     msg.textContent = data.message || 'Login failed.';

@@ -167,10 +167,44 @@ async function removeItem(req, res) {
   }
 }
 
+async function mergeGuestCart(req, res) {
+  try {
+    const customerId = req.session.user.customerId;
+    const { items } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(200).json({ success: true, message: 'Nothing to merge.' });
+    }
+
+    for (const item of items) {
+      const productId = item.productId;
+      const quantity  = Number.parseInt(item.quantity, 10);
+      if (!productId || Number.isNaN(quantity) || quantity <= 0) continue;
+
+      const product = await ProductDAO.getProductById(productId);
+      if (!product) continue;
+
+      const safeQty = Math.min(quantity, product.inventoryQuantity);
+      if (safeQty <= 0) continue;
+
+      await CartDAO.upsertItem(customerId, productId, safeQty);
+    }
+
+    const mergedItems  = await CartDAO.getCartByCustomer(customerId);
+    const subtotalCents = computeSubtotalCents(mergedItems);
+
+    return res.status(200).json({ success: true, items: mergedItems, subtotalCents });
+  } catch (error) {
+    console.error('Merge guest cart error:', error);
+    return res.status(500).json({ success: false, message: 'Server error during cart merge.' });
+  }
+}
+
 module.exports = {
   getCart,
   addOrUpdate,
   updateQuantity,
   removeItem,
+  mergeGuestCart,
   computeSubtotalCents
 };

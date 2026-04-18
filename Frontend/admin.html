@@ -25,6 +25,37 @@
     </ul>
 
     <div id="tab-orders">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">Filter Orders</h6>
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label small mb-1">Customer ID</label>
+              <input type="number" class="form-control form-control-sm" id="filter-customer" placeholder="e.g. 2" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small mb-1">Order Status</label>
+              <select class="form-select form-select-sm" id="filter-status">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small mb-1">From Date</label>
+              <input type="date" class="form-control form-control-sm" id="filter-from" />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small mb-1">To Date</label>
+              <input type="date" class="form-control form-control-sm" id="filter-to" />
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-sm btn-dark w-100" onclick="loadOrders()">Apply</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="card">
         <div class="card-body">
           <h5 class="card-title mb-3">All Orders</h5>
@@ -44,17 +75,16 @@
         <div class="card-body">
           <h5 class="card-title mb-3">Add New Product</h5>
           <div class="row g-3">
-            <div class="col-md-4"><label class="form-label fw-bold">Product ID</label><input type="text" class="form-control" id="new-id" placeholder="SNK-BRAND-XXX" /></div>
-            <div class="col-md-4"><label class="form-label fw-bold">Name</label><input type="text" class="form-control" id="new-name" /></div>
-            <div class="col-md-4"><label class="form-label fw-bold">Model</label><input type="text" class="form-control" id="new-model" /></div>
-            <div class="col-md-4"><label class="form-label fw-bold">Brand ID</label><input type="number" class="form-control" id="new-brand" /></div>
-            <div class="col-md-4"><label class="form-label fw-bold">Category ID</label><input type="number" class="form-control" id="new-cat" /></div>
-            <div class="col-md-4"><label class="form-label fw-bold">Price (cents)</label><input type="number" class="form-control" id="new-price" /></div>
-            <div class="col-md-4"><label class="form-label fw-bold">Inventory</label><input type="number" class="form-control" id="new-qty" /></div>
-            <div class="col-md-4"><label class="form-label fw-bold">Size Range</label><input type="text" class="form-control" id="new-size" placeholder="US 7-13" /></div>
-            <div class="col-md-4"><label class="form-label fw-bold">Release Year</label><input type="number" class="form-control" id="new-year" /></div>
-            <div class="col-12"><label class="form-label fw-bold">Description</label><textarea class="form-control" id="new-desc" rows="2"></textarea></div>
-            <div class="col-md-6"><label class="form-label fw-bold">Colorway</label><input type="text" class="form-control" id="new-colorway" /></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Name *</label><input type="text" class="form-control" id="new-name" placeholder="e.g. Air Force 1 '07" /></div>
+            <div class="col-md-3"><label class="form-label fw-bold">Brand *</label><select class="form-select" id="new-brand"><option value="">Select brand…</option></select></div>
+            <div class="col-md-3"><label class="form-label fw-bold">Category *</label><select class="form-select" id="new-cat"><option value="">Select category…</option></select></div>
+            <div class="col-md-3"><label class="form-label fw-bold">Price ($) *</label><input type="number" class="form-control" id="new-price" placeholder="0.00" min="0" step="0.01" /></div>
+            <div class="col-md-3"><label class="form-label fw-bold">Inventory *</label><input type="number" class="form-control" id="new-qty" placeholder="0" min="0" /></div>
+            <div class="col-md-3"><label class="form-label fw-bold">Colorway *</label><input type="text" class="form-control" id="new-colorway" placeholder="e.g. White/White" /></div>
+            <div class="col-md-3"><label class="form-label fw-bold">Release Year</label><input type="number" class="form-control" id="new-year" placeholder="2024" min="1980" max="2030" /></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Size Range</label><input type="text" class="form-control" id="new-size" placeholder="US 7-13" /></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Image URL</label><input type="text" class="form-control" id="new-img" placeholder="https://…" /></div>
+            <div class="col-12"><label class="form-label fw-bold">Description</label><textarea class="form-control" id="new-desc" rows="2" placeholder="Brief description of the shoe…"></textarea></div>
           </div>
           <button class="btn btn-dark mt-3 fw-bold" onclick="addProduct()">Add Product</button>
           <p id="add-msg" class="mt-2 fw-bold"></p>

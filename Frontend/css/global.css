@@ -80,6 +80,39 @@ button, input, select, textarea { font: inherit; }
   border: none;
 }
 
+/* ── CART ICON ── */
+.cart-icon-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,0.45);
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  background: transparent;
+  text-decoration: none;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #f05d2f;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
 /* ── BUTTONS ── */
 .btn-primary {
   background: var(--brand);

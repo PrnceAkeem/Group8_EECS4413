@@ -8,11 +8,18 @@ Sneaker e-store built for the EECS 4413 (Building E-Commerce Systems) course at 
 
 Make sure Docker Desktop is open, then from the project root:
 
+**Mac / Linux:**
 ```bash
 ./start.sh
 ```
 
-Or manually:
+**Windows:**
+```
+start.bat
+```
+Double-click `start.bat` in File Explorer, or run it from CMD.
+
+Or manually on any platform:
 
 ```bash
 docker compose down --remove-orphans
@@ -134,6 +141,7 @@ Sort options (`price_asc`, `price_desc`, `name_asc`, `name_desc`) are validated 
 |--------|------|-------------|
 | GET | `/` | Get all cart items + subtotal for current session |
 | POST | `/` | Add item or update quantity. Body: `{ productId, quantity }` |
+| POST | `/merge` | Merge guest localStorage cart on login. Body: `{ items: [{productId, quantity}] }` |
 | PATCH | `/:productId` | Update quantity of one item. Body: `{ quantity }` |
 | DELETE | `/:productId` | Remove one item from cart |
 
@@ -158,15 +166,14 @@ Sort options (`price_asc`, `price_desc`, `name_asc`, `name_desc`) are validated 
 
 | Method | Path | What it does |
 |--------|------|-------------|
-| GET | `/orders` | List all orders across all customers |
-| GET | `/orders/:id` | Get one order with full customer details |
-| PATCH | `/orders/:id/status` | Update order status e.g. `shipped`, `delivered` |
+| GET | `/meta` | Returns all brands and categories (used to populate add-product form) |
+| GET | `/orders` | List all orders. Supports `?customerId=`, `?status=`, `?from=`, `?to=` filters |
+| GET | `/orders/:id/items` | Get line items for one order |
 | GET | `/customers` | List all customers |
-| GET | `/customers/:id` | Get one customer with order history |
+| PATCH | `/customers/:id` | Update customer name, email, or phone |
 | GET | `/products` | List all products including inactive |
-| POST | `/products` | Add a new product |
+| POST | `/products` | Add a new product. Body: `{ name, brand, category, priceDollars, inventoryQuantity, colorway, imageUrl?, sizeRange?, releaseYear?, description? }` |
 | PATCH | `/products/:id` | Update product details or inventory |
-| DELETE | `/products/:id` | Soft-delete a product (sets `is_active = false`) |
 
 ---
 

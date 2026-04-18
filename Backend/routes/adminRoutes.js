@@ -9,10 +9,12 @@ router.use(requireAuth);
 router.use(requireAdmin);
 
 router.get('/orders', adminController.listOrders);
+router.get('/orders/:id/items', adminController.getOrderItems);
 
 router.get('/customers', adminController.listCustomers);
 router.patch('/customers/:id', adminController.patchCustomer);
 
+router.get('/meta', adminController.getMeta);
 router.get('/products', adminController.listProducts);
 router.patch('/products/:id', adminController.patchProduct);
 router.post('/products', adminController.createProduct);

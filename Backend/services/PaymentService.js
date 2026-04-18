@@ -30,11 +30,4 @@ async function processPayment({ amountCents = 0, cardLast4 = '0000' } = {}) {
   return result;
 }
 
-function getPaymentAttemptCount() {
-  return requestCount;
-}
-
-module.exports = {
-  processPayment,
-  getPaymentAttemptCount
-};
+module.exports = { processPayment };

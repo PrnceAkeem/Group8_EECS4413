@@ -16,7 +16,9 @@ async function loadNav() {
     return;
   }
 
+  const count = JSON.parse(localStorage.getItem('guestCart') || '[]').reduce((s, i) => s + i.quantity, 0);
   el.innerHTML = `
+    <a class="cart-icon-link" href="/cart.html">🛒${count > 0 ? `<span class="cart-badge">${count}</span>` : ''}</a>
     <a class="nav-link" href="/login.html">Sign In</a>
     <a class="nav-link filled" href="/register.html">Register</a>
   `;

@@ -447,6 +447,32 @@ async function createProduct(productData) {
   return getProductById(productId);
 }
 
+async function getOrderItems(orderId) {
+  const result = await db.query(
+    `SELECT
+       oi.order_item_id,
+       oi.order_id,
+       oi.product_id,
+       p.name AS product_name,
+       oi.unit_price_cents,
+       oi.quantity,
+       (oi.unit_price_cents * oi.quantity) AS line_total_cents
+     FROM order_items oi
+     JOIN products p ON p.product_id = oi.product_id
+     WHERE oi.order_id = $1
+     ORDER BY oi.order_item_id ASC`,
+    [orderId]
+  );
+  return result.rows.map(row => ({
+    orderItemId:    row.order_item_id,
+    productId:      row.product_id,
+    productName:    row.product_name,
+    unitPriceCents: row.unit_price_cents,
+    quantity:       row.quantity,
+    lineTotalCents: row.line_total_cents
+  }));
+}
+
 module.exports = {
   getAllOrders,
   getAllCustomers,
@@ -454,5 +480,6 @@ module.exports = {
   getAllProducts,
   updateProduct,
   createProduct,
-  getProductById
+  getProductById,
+  getOrderItems
 };

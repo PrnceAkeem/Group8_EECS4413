@@ -1,4 +1,5 @@
 const AdminDAO = require('../../dao/AdminDAO');
+const db = require('../../db');
 
 async function listProducts(req, res) {
   try {
@@ -197,162 +198,115 @@ async function patchProduct(req, res) {
   }
 }
 
+async function getMeta(req, res) {
+  try {
+    const [brandsResult, categoriesResult] = await Promise.all([
+      db.query('SELECT brand_id, name FROM brands ORDER BY name ASC'),
+      db.query('SELECT category_id, name FROM categories ORDER BY name ASC')
+    ]);
+    return res.status(200).json({
+      success: true,
+      brands: brandsResult.rows.map(r => ({ id: r.brand_id, name: r.name })),
+      categories: categoriesResult.rows.map(r => ({ id: r.category_id, name: r.name }))
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+}
+
 async function createProduct(req, res) {
   try {
     const {
-      productId,
       name,
-      model,
-      description,
-      colorway,
-      priceCents,
+      brand,
+      category,
+      priceDollars,
       inventoryQuantity,
-      releaseYear,
-      sizeRange,
-      brandId,
-      categoryId,
+      colorway,
       imageUrl,
-      isActive
+      sizeRange,
+      releaseYear,
+      description
     } = req.body;
 
-    if (!productId || typeof productId !== 'string' || !productId.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'productId is required.'
-      });
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Name is required.' });
+    }
+    if (!brand) {
+      return res.status(400).json({ success: false, message: 'Brand is required.' });
+    }
+    if (!category) {
+      return res.status(400).json({ success: false, message: 'Category is required.' });
+    }
+    if (!colorway || !colorway.trim()) {
+      return res.status(400).json({ success: false, message: 'Colorway is required.' });
     }
 
-    if (!name || typeof name !== 'string' || !name.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'name is required.'
-      });
+    const priceNum = parseFloat(priceDollars);
+    if (isNaN(priceNum) || priceNum < 0) {
+      return res.status(400).json({ success: false, message: 'Price must be a valid number.' });
+    }
+    const priceCents = Math.round(priceNum * 100);
+
+    const parsedQty = parseInt(inventoryQuantity, 10);
+    if (isNaN(parsedQty) || parsedQty < 0) {
+      return res.status(400).json({ success: false, message: 'Inventory must be a non-negative number.' });
     }
 
-    if (!model || typeof model !== 'string' || !model.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'model is required.'
-      });
+    const brandRow = await db.query('SELECT brand_id FROM brands WHERE LOWER(name) = LOWER($1)', [brand]);
+    if (brandRow.rows.length === 0) {
+      return res.status(400).json({ success: false, message: `Brand "${brand}" not found.` });
     }
+    const brandId = brandRow.rows[0].brand_id;
 
-    if (!colorway || typeof colorway !== 'string' || !colorway.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'colorway is required.'
-      });
+    const catRow = await db.query('SELECT category_id FROM categories WHERE LOWER(name) = LOWER($1)', [category]);
+    if (catRow.rows.length === 0) {
+      return res.status(400).json({ success: false, message: `Category "${category}" not found.` });
     }
+    const categoryId = catRow.rows[0].category_id;
 
-    const parsedPriceCents = Number.parseInt(priceCents, 10);
-    if (Number.isNaN(parsedPriceCents) || parsedPriceCents < 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'priceCents must be a non-negative integer.'
-      });
-    }
-
-    const parsedInventoryQuantity = Number.parseInt(inventoryQuantity, 10);
-    if (Number.isNaN(parsedInventoryQuantity) || parsedInventoryQuantity < 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'inventoryQuantity must be a non-negative integer.'
-      });
-    }
-
-    const parsedBrandId = Number.parseInt(brandId, 10);
-    if (Number.isNaN(parsedBrandId) || parsedBrandId <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'brandId must be a positive integer.'
-      });
-    }
-
-    const parsedCategoryId = Number.parseInt(categoryId, 10);
-    if (Number.isNaN(parsedCategoryId) || parsedCategoryId <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'categoryId must be a positive integer.'
-      });
-    }
+    const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const brandSlug = brand.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const productId = `SNK-${brandSlug}-${slug}-${Date.now()}`.slice(0, 64);
 
     let parsedReleaseYear = null;
-    if (releaseYear !== undefined && releaseYear !== null && releaseYear !== '') {
-      parsedReleaseYear = Number.parseInt(releaseYear, 10);
-      if (Number.isNaN(parsedReleaseYear) || parsedReleaseYear < 1900) {
-        return res.status(400).json({
-          success: false,
-          message: 'releaseYear must be a valid integer year, null, or omitted.'
-        });
+    if (releaseYear && releaseYear !== '') {
+      parsedReleaseYear = parseInt(releaseYear, 10);
+      if (isNaN(parsedReleaseYear) || parsedReleaseYear < 1900) {
+        return res.status(400).json({ success: false, message: 'Release year must be a valid year.' });
       }
     }
 
-    if (description !== undefined && description !== null && typeof description !== 'string') {
-      return res.status(400).json({
-        success: false,
-        message: 'description must be a string or null.'
-      });
-    }
-
-    if (sizeRange !== undefined && sizeRange !== null && typeof sizeRange !== 'string') {
-      return res.status(400).json({
-        success: false,
-        message: 'sizeRange must be a string or null.'
-      });
-    }
-
-    if (imageUrl !== undefined && imageUrl !== null && typeof imageUrl !== 'string') {
-      return res.status(400).json({
-        success: false,
-        message: 'imageUrl must be a string or null.'
-      });
-    }
-
-    if (isActive !== undefined && typeof isActive !== 'boolean') {
-      return res.status(400).json({
-        success: false,
-        message: 'isActive must be a boolean.'
-      });
-    }
-
     const product = await AdminDAO.createProduct({
-      productId: productId.trim(),
+      productId,
       name: name.trim(),
-      model: model.trim(),
-      description: description === undefined || description === null ? null : description.trim(),
+      model: name.trim(),
+      description: description ? description.trim() : null,
       colorway: colorway.trim(),
-      priceCents: parsedPriceCents,
-      inventoryQuantity: parsedInventoryQuantity,
+      priceCents,
+      inventoryQuantity: parsedQty,
       releaseYear: parsedReleaseYear,
-      sizeRange: sizeRange === undefined || sizeRange === null ? null : sizeRange.trim(),
-      brandId: parsedBrandId,
-      categoryId: parsedCategoryId,
-      imageUrl: imageUrl === undefined || imageUrl === null ? null : imageUrl.trim(),
-      isActive: isActive === undefined ? true : isActive
+      sizeRange: sizeRange ? sizeRange.trim() : 'US 7-13',
+      brandId,
+      categoryId,
+      imageUrl: imageUrl ? imageUrl.trim() : null,
+      isActive: true
     });
 
     return res.status(201).json({
       success: true,
-      message: 'Product created successfully.',
+      message: 'Product added successfully.',
       product
     });
   } catch (error) {
-    if (error.code === '23505') {
-      return res.status(409).json({
-        success: false,
-        message: 'productId already exists.'
-      });
-    }
-
     console.error('Admin create product error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while creating product.'
-    });
+    return res.status(500).json({ success: false, message: 'Server error while creating product.' });
   }
 }
 
 module.exports = {
   listProducts,
   patchProduct,
-  createProduct
+  createProduct,
+  getMeta
 };

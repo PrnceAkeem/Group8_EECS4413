@@ -15,7 +15,9 @@ async function loadNav() {
     `;
   } else {
     isLoggedIn = false;
+    const count = JSON.parse(localStorage.getItem('guestCart') || '[]').reduce((s, i) => s + i.quantity, 0);
     el.innerHTML = `
+      <a class="cart-icon-link" href="/cart.html">🛒${count > 0 ? `<span class="cart-badge">${count}</span>` : ''}</a>
       <a class="nav-link" href="/login.html">Sign In</a>
       <a class="nav-link filled" href="/register.html">Register</a>
     `;
@@ -95,10 +97,24 @@ async function loadProducts() {
 }
 
 async function addToCart(productId, btn) {
-  if (!isLoggedIn) { window.location.href = '/login.html?next=/catalog.html'; return; }
   const original = btn.textContent;
   btn.disabled = true;
   btn.textContent = '...';
+
+  if (!isLoggedIn) {
+    const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+    const idx = guestCart.findIndex(i => i.productId === productId);
+    if (idx !== -1) {
+      guestCart[idx].quantity += 1;
+    } else {
+      guestCart.push({ productId, quantity: 1 });
+    }
+    localStorage.setItem('guestCart', JSON.stringify(guestCart));
+    btn.textContent = 'Added!';
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1500);
+    return;
+  }
+
   const res = await fetch('/api/cart', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
