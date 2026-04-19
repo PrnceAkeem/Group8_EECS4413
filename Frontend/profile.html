@@ -25,6 +25,7 @@
       <li class="nav-item"><button class="nav-link" onclick="showTab('orders')">Order History</button></li>
     </ul>
 
+    <!-- Personal Info -->
     <div id="tab-info">
       <div class="card">
         <div class="card-body">
@@ -57,10 +58,18 @@
       </div>
     </div>
 
+    <!-- Address -->
     <div id="tab-address" style="display:none">
+      <!-- Saved addresses list -->
+      <div id="addresses-list" class="mb-3"></div>
+
+      <!-- Add / Edit form -->
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-3">Shipping / Billing Address</h5>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0" id="addr-form-title">Add New Address</h5>
+            <button class="btn btn-sm btn-outline-secondary" onclick="newAddress()">+ Add New</button>
+          </div>
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-bold">Recipient Name</label>
@@ -88,13 +97,13 @@
             </div>
             <div class="col-md-6">
               <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="isDefaultShipping" checked />
+                <input class="form-check-input" type="checkbox" id="isDefaultShipping" />
                 <label class="form-check-label fw-bold" for="isDefaultShipping">Default Shipping</label>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="isDefaultBilling" checked />
+                <input class="form-check-input" type="checkbox" id="isDefaultBilling" />
                 <label class="form-check-label fw-bold" for="isDefaultBilling">Default Billing</label>
               </div>
             </div>
@@ -105,10 +114,18 @@
       </div>
     </div>
 
+    <!-- Payment -->
     <div id="tab-payment" style="display:none">
+      <!-- Saved payment methods list -->
+      <div id="payments-list" class="mb-3"></div>
+
+      <!-- Add / Edit form -->
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-3">Payment Method</h5>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0" id="pay-form-title">Add New Payment Method</h5>
+            <button class="btn btn-sm btn-outline-secondary" onclick="newPayment()">+ Add New</button>
+          </div>
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-bold">Cardholder Name</label>
@@ -143,6 +160,7 @@
       </div>
     </div>
 
+    <!-- Order History -->
     <div id="tab-orders" style="display:none">
       <div id="orders-list"></div>
     </div>

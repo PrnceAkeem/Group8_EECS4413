@@ -264,9 +264,10 @@ async function createProduct(req, res) {
     }
     const categoryId = catRow.rows[0].category_id;
 
-    const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    const brandSlug = brand.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const productId = `SNK-${brandSlug}-${slug}-${Date.now()}`.slice(0, 64);
+    const slug      = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 12);
+    const brandSlug = brand.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 5).toUpperCase();
+    const suffix    = Math.random().toString(36).slice(2, 6).toUpperCase();
+    const productId = `SNK-${brandSlug}-${slug}-${suffix}`.slice(0, 64);
 
     const product = await AdminDAO.createProduct({
       productId,

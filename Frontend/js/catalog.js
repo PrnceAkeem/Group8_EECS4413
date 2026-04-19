@@ -9,15 +9,15 @@ async function loadNav() {
     isLoggedIn = true;
     el.innerHTML = `
       <span style="color:#fff;font-weight:700">Hi, ${data.user.firstName}</span>
+      ${data.user.isAdmin ? '<a class="nav-link" href="/admin.html">Admin</a>' : ''}
       <a class="nav-link" href="/cart.html">Cart</a>
       <a class="nav-link" href="/profile.html">Profile</a>
       <button class="nav-link" onclick="logout()">Sign Out</button>
     `;
   } else {
     isLoggedIn = false;
-    const count = JSON.parse(localStorage.getItem('guestCart') || '[]').reduce((s, i) => s + i.quantity, 0);
     el.innerHTML = `
-      <a class="cart-icon-link" href="/cart.html">🛒${count > 0 ? `<span class="cart-badge">${count}</span>` : ''}</a>
+      <a class="nav-link" href="/cart.html">Cart</a>
       <a class="nav-link" href="/login.html">Sign In</a>
       <a class="nav-link filled" href="/register.html">Register</a>
     `;

@@ -5,6 +5,7 @@ async function loadNav() {
     const data = await res.json();
     el.innerHTML = `
       <span style="color:#fff;font-weight:700">Hi, ${data.user.firstName}</span>
+      ${data.user.isAdmin ? '<a class="nav-link" href="/admin.html">Admin</a>' : ''}
       <a class="nav-link" href="/cart.html">Cart</a>
       <a class="nav-link" href="/profile.html">Profile</a>
       <button class="nav-link" onclick="logout()">Sign Out</button>
