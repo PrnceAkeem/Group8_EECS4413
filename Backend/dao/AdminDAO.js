@@ -473,10 +473,97 @@ async function getOrderItems(orderId) {
   }));
 }
 
+async function updateOrderStatus(orderId, status) {
+  const result = await db.query(
+    `UPDATE purchase_orders SET order_status = $1 WHERE order_id = $2
+     RETURNING order_id, order_status`,
+    [status, orderId]
+  );
+  return result.rows[0] || null;
+}
+
+async function deleteCustomer(customerId) {
+  await db.query('DELETE FROM customers WHERE customer_id = $1', [customerId]);
+}
+
+async function getCustomerById(customerId) {
+  const custRes = await db.query(
+    `SELECT customer_id, first_name, last_name, dob, email, phone, is_admin, created_at, updated_at
+     FROM customers WHERE customer_id = $1`,
+    [customerId]
+  );
+  if (!custRes.rows[0]) return null;
+  const customer = mapAdminCustomer(custRes.rows[0]);
+
+  const addrRes = await db.query(
+    `SELECT address_id, label, recipient_name, street_line1, city, province, postal_code, country,
+            is_default_shipping, is_default_billing
+     FROM addresses WHERE customer_id = $1 ORDER BY address_id ASC`,
+    [customerId]
+  );
+  const pmRes = await db.query(
+    `SELECT payment_method_id, cardholder_name, card_brand, card_last4, expiry_month, expiry_year, is_default
+     FROM payment_methods WHERE customer_id = $1 ORDER BY payment_method_id ASC`,
+    [customerId]
+  );
+
+  return {
+    ...customer,
+    addresses: addrRes.rows.map(r => ({
+      addressId: r.address_id,
+      label: r.label,
+      recipientName: r.recipient_name,
+      streetLine1: r.street_line1,
+      city: r.city,
+      province: r.province,
+      postalCode: r.postal_code,
+      country: r.country,
+      isDefaultShipping: r.is_default_shipping,
+      isDefaultBilling: r.is_default_billing
+    })),
+    paymentMethods: pmRes.rows.map(r => ({
+      paymentMethodId: r.payment_method_id,
+      cardholderName: r.cardholder_name,
+      cardBrand: r.card_brand,
+      cardLast4: r.card_last4,
+      expiryMonth: r.expiry_month,
+      expiryYear: r.expiry_year,
+      isDefault: r.is_default
+    }))
+  };
+}
+
+async function deleteAddress(addressId, customerId) {
+  await db.query(
+    'DELETE FROM addresses WHERE address_id = $1 AND customer_id = $2',
+    [addressId, customerId]
+  );
+}
+
+async function deletePaymentMethod(paymentMethodId, customerId) {
+  await db.query(
+    'DELETE FROM payment_methods WHERE payment_method_id = $1 AND customer_id = $2',
+    [paymentMethodId, customerId]
+  );
+}
+
+async function updateCustomerPassword(customerId, hashedPassword) {
+  await db.query(
+    'UPDATE customers SET password = $1, updated_at = NOW() WHERE customer_id = $2',
+    [hashedPassword, customerId]
+  );
+}
+
 module.exports = {
   getAllOrders,
   getAllCustomers,
   updateCustomer,
+  deleteCustomer,
+  getCustomerById,
+  deleteAddress,
+  deletePaymentMethod,
+  updateCustomerPassword,
+  updateOrderStatus,
   getAllProducts,
   updateProduct,
   createProduct,

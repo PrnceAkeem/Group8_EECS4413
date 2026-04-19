@@ -1,3 +1,6 @@
+const params = new URLSearchParams(window.location.search);
+const next = params.get('next') || '/catalog.html';
+
 async function register() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName  = document.getElementById('lastName').value.trim();
@@ -28,9 +31,18 @@ async function register() {
   const data = await res.json();
 
   if (res.ok) {
+    const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+    if (guestCart.length > 0) {
+      await fetch('/api/cart/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: guestCart })
+      }).catch(() => null);
+      localStorage.removeItem('guestCart');
+    }
     msg.className = 'msg success';
-    msg.textContent = 'Account created! Redirecting to sign in...';
-    setTimeout(() => { window.location.href = '/login.html'; }, 1200);
+    msg.textContent = 'Account created! Redirecting...';
+    setTimeout(() => { window.location.href = next; }, 1200);
   } else {
     msg.className = 'msg error';
     msg.textContent = data.message || 'Registration failed.';

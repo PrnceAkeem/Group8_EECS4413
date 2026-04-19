@@ -104,7 +104,73 @@ async function patchCustomer(req, res) {
   }
 }
 
+async function getCustomer(req, res) {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(id) || id <= 0) return res.status(400).json({ success: false, message: 'Invalid customer ID.' });
+    const customer = await AdminDAO.getCustomerById(id);
+    if (!customer) return res.status(404).json({ success: false, message: 'Customer not found.' });
+    return res.status(200).json({ success: true, customer });
+  } catch (error) {
+    console.error('Admin get customer error:', error);
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+}
+
+async function deleteCustomer(req, res) {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(id) || id <= 0) return res.status(400).json({ success: false, message: 'Invalid customer ID.' });
+    await AdminDAO.deleteCustomer(id);
+    return res.status(200).json({ success: true, message: 'Customer deleted.' });
+  } catch (error) {
+    console.error('Admin delete customer error:', error);
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+}
+
+async function deleteCustomerAddress(req, res) {
+  try {
+    const customerId = Number.parseInt(req.params.id, 10);
+    const addressId  = Number.parseInt(req.params.addressId, 10);
+    await AdminDAO.deleteAddress(addressId, customerId);
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+}
+
+async function deleteCustomerPayment(req, res) {
+  try {
+    const customerId      = Number.parseInt(req.params.id, 10);
+    const paymentMethodId = Number.parseInt(req.params.pmId, 10);
+    await AdminDAO.deletePaymentMethod(paymentMethodId, customerId);
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+}
+
+async function resetCustomerPassword(req, res) {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    const { password } = req.body;
+    if (!password || password.length < 4) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 4 characters.' });
+    }
+    await AdminDAO.updateCustomerPassword(id, password);
+    return res.status(200).json({ success: true, message: 'Password updated.' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+}
+
 module.exports = {
   listCustomers,
-  patchCustomer
+  patchCustomer,
+  getCustomer,
+  deleteCustomer,
+  deleteCustomerAddress,
+  deleteCustomerPayment,
+  resetCustomerPassword
 };

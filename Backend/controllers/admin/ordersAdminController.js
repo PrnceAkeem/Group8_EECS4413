@@ -69,7 +69,28 @@ async function getOrderItems(req, res) {
   }
 }
 
+async function updateOrderStatus(req, res) {
+  try {
+    const orderId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(orderId) || orderId <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid order ID.' });
+    }
+    const { status } = req.body;
+    const VALID = ['processing', 'shipped', 'delivered', 'cancelled'];
+    if (!VALID.includes(status)) {
+      return res.status(400).json({ success: false, message: `Status must be one of: ${VALID.join(', ')}` });
+    }
+    const result = await AdminDAO.updateOrderStatus(orderId, status);
+    if (!result) return res.status(404).json({ success: false, message: 'Order not found.' });
+    return res.status(200).json({ success: true, orderId: result.order_id, orderStatus: result.order_status });
+  } catch (error) {
+    console.error('Admin update order status error:', error);
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+}
+
 module.exports = {
   listOrders,
-  getOrderItems
+  getOrderItems,
+  updateOrderStatus
 };
