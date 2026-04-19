@@ -1,6 +1,8 @@
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const fs = require('fs');
+const path = require('path');
 
 const pool = require('./db');
 const authRoutes = require('./routes/authRoutes');
@@ -10,7 +12,13 @@ const orderRoutes = require('./routes/orderRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
-const path = require('path');
+async function initDatabase() {
+  const schema = fs.readFileSync(path.join(__dirname, 'db/init/01_schema.sql'), 'utf8');
+  const seed   = fs.readFileSync(path.join(__dirname, 'db/init/02_seed.sql'),   'utf8');
+  await pool.query(schema);
+  await pool.query(seed);
+  console.log('Database initialised.');
+}
 
 const app = express();
 const PORT = Number.parseInt(process.env.PORT || '5050', 10);
@@ -67,6 +75,13 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
-});
+initDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://0.0.0.0:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to initialise database:', err);
+    process.exit(1);
+  });

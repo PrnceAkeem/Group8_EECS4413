@@ -1,37 +1,5 @@
 BEGIN;
 
--- Keep only the approved Phase 2 catalog active.
--- Older teammate/test products stay in DB history but are hidden from the storefront.
-UPDATE products
-SET is_active = FALSE
-WHERE product_id NOT IN (
-  'SNK-NIKE-AF1',
-  'SNK-NIKE-DUNK',
-  'SNK-NIKE-AM90',
-  'SNK-NIKE-AM95',
-  'SNK-NIKE-V5',
-  'SNK-JOR-AJ1',
-  'SNK-JOR-AJ3',
-  'SNK-JOR-RET7',
-  'SNK-JOR-AJ11',
-  'SNK-JOR-AJ12',
-  'SNK-ADI-SAMBA',
-  'SNK-ADI-GAZ',
-  'SNK-ADI-CAMP',
-  'SNK-ADI-SPEZ',
-  'SNK-ADI-YZY',
-  'SNK-CON-CTAS',
-  'SNK-CON-C70',
-  'SNK-CON-ONEST',
-  'SNK-CON-RSH',
-  'SNK-CON-SHAI',
-  'SNK-NB-550',
-  'SNK-NB-2002R',
-  'SNK-NB-1906R',
-  'SNK-NB-9060',
-  'SNK-NB-530'
-);
-
 INSERT INTO brands (name)
 VALUES
   ('Nike'),
