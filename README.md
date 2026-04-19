@@ -208,3 +208,32 @@ Copy `.env.example` to `.env` to override defaults:
 | `BACKEND_PORT` | `5050` | |
 | `SESSION_SECRET` | `change-me-before-production` | Any random string works locally |
 | `SESSION_COOKIE_SECURE` | `false` | Set `true` if deployed over HTTPS |
+
+---
+
+## Cloud Deployment Attempt — Railway
+
+We attempted to host the live version of 6ixOutside on **Railway** (https://railway.app), a cloud platform that deploys directly from a GitHub repository.
+
+**Live URL (may or may not be active):** https://group8eecs4413-production.up.railway.app/catalog.html
+
+### How Railway works
+
+Railway reads your GitHub repo and builds the app using your `Dockerfile`. Every time you push to the main branch, Railway automatically pulls the latest code and redeploys — no manual upload needed.
+
+We ran two services inside the same Railway project:
+
+| Service | What it is |
+|---------|-----------|
+| `Group8_EECS4413` | The Node/Express backend, built from the root `Dockerfile` |
+| `Postgres` | A managed PostgreSQL database provisioned by Railway |
+
+Railway injects a `DATABASE_URL` environment variable into the backend service that points directly to the managed Postgres instance. The backend reads this at startup — if `DATABASE_URL` is set it connects to Railway's DB, otherwise it falls back to the local Docker credentials. This is how the same codebase runs both locally and in the cloud without any code changes.
+
+On first boot, the backend automatically runs `01_schema.sql` (creates all tables) and `02_seed.sql` (inserts all 25 products and demo accounts) against the Railway database before the server starts accepting requests.
+
+### Issues we ran into
+
+- **Port mismatch** — Railway assigns a dynamic `PORT` env variable. Our server already reads `process.env.PORT` so this worked, but the Railway networking panel had to be pointed at port `8080`.
+- **Missing Frontend files** — Railway's default build only copied the `Backend/` folder. Fixed by adding a root-level `Dockerfile` that copies both `Backend/` and `Frontend/` into the image.
+- **Session cookies not persisting** — Railway sits behind a reverse proxy (load balancer) that terminates HTTPS. Without `app.set('trust proxy', 1)` in Express, secure session cookies were dropped after login. Fixed with one line in `server.js`.

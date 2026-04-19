@@ -171,8 +171,7 @@ async function addProduct() {
     priceDollars:      document.getElementById('new-price').value,
     inventoryQuantity: document.getElementById('new-qty').value,
     colorway:          document.getElementById('new-colorway').value.trim(),
-    releaseYear:       document.getElementById('new-year').value,
-    sizeRange:         document.getElementById('new-size').value.trim() || 'US 7-13',
+    sizeRange:         document.getElementById('new-size').value,
     imageUrl:          document.getElementById('new-img').value.trim() || null,
     description:       document.getElementById('new-desc').value.trim() || null
   };
@@ -185,12 +184,13 @@ async function addProduct() {
   msg.className  = res.ok ? 'mt-2 fw-bold text-success' : 'mt-2 fw-bold text-danger';
   msg.textContent = res.ok ? `Product "${data.product.name}" added!` : (data.message || 'Failed.');
   if (res.ok) {
-    ['new-name','new-price','new-qty','new-colorway','new-year','new-size','new-img','new-desc'].forEach(id => {
+    ['new-name','new-price','new-qty','new-colorway','new-img','new-desc'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
     document.getElementById('new-brand').value = '';
     document.getElementById('new-cat').value = '';
+    document.getElementById('new-size').value = 'US 7-13';
     loadInventory();
   }
 }

@@ -28,6 +28,7 @@ const sessionMaxAgeMs = Number.parseInt(
 );
 const useSecureSessionCookie = process.env.SESSION_COOKIE_SECURE === 'true';
 
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cookieParser());
 

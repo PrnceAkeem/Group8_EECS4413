@@ -206,7 +206,7 @@ async function getMeta(req, res) {
     ]);
     return res.status(200).json({
       success: true,
-      brands: brandsResult.rows.map(r => ({ id: r.brand_id, name: r.name })),
+      brands:     brandsResult.rows.map(r => ({ id: r.brand_id, name: r.name })),
       categories: categoriesResult.rows.map(r => ({ id: r.category_id, name: r.name }))
     });
   } catch (error) {
@@ -225,7 +225,6 @@ async function createProduct(req, res) {
       colorway,
       imageUrl,
       sizeRange,
-      releaseYear,
       description
     } = req.body;
 
@@ -269,14 +268,6 @@ async function createProduct(req, res) {
     const brandSlug = brand.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const productId = `SNK-${brandSlug}-${slug}-${Date.now()}`.slice(0, 64);
 
-    let parsedReleaseYear = null;
-    if (releaseYear && releaseYear !== '') {
-      parsedReleaseYear = parseInt(releaseYear, 10);
-      if (isNaN(parsedReleaseYear) || parsedReleaseYear < 1900) {
-        return res.status(400).json({ success: false, message: 'Release year must be a valid year.' });
-      }
-    }
-
     const product = await AdminDAO.createProduct({
       productId,
       name: name.trim(),
@@ -285,8 +276,8 @@ async function createProduct(req, res) {
       colorway: colorway.trim(),
       priceCents,
       inventoryQuantity: parsedQty,
-      releaseYear: parsedReleaseYear,
-      sizeRange: sizeRange ? sizeRange.trim() : 'US 7-13',
+      releaseYear: null,
+      sizeRange: sizeRange || 'US 7-13',
       brandId,
       categoryId,
       imageUrl: imageUrl ? imageUrl.trim() : null,
